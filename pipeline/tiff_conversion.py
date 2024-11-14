@@ -1,5 +1,6 @@
 import h5py
 import numpy as np
+import gdal
 
 # Open the HDF5 file in read mode
 with h5py.File("./SIH2024/3RIMG_04SEP2024_1615_L1B_STD_V01R00.h5", "r") as hdf:
@@ -12,7 +13,6 @@ with h5py.File("./SIH2024/3RIMG_04SEP2024_1615_L1B_STD_V01R00.h5", "r") as hdf:
     data = np.array(dataset)
     print(data)
 
-from osgeo import gdal
 
 single_band_array = np.squeeze(dataset, axis=0)
 # Remove the extra dimension by selecting the first slice

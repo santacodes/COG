@@ -1,0 +1,47 @@
+{
+  "name": "l8app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server -d --hot --config webpack.conf.js",
+    "build": "rm -rf dist/* ; NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.conf.js; cp -R images index.html dist/",
+    "deploy": "git subtree push --prefix dist/ origin gh-pages"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "geotiff": "^1.0.4",
+    "ol": "^4.6.5",
+    "proj4": "^2.4.4",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
+    "react-redux": "^5.0.7",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0",
+    "url-join": "^4.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "escope": "^3.6.0",
+    "eslint": "^4.18.2",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "react-hot-loader": "^4.1.0",
+    "style-loader": "^0.20.3",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^3.3.4",
+    "webpack-dev-server": "^3.1.3",
+    "worker-loader": "^1.1.1"
+  }
+}
