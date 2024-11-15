@@ -3,7 +3,7 @@ import numpy as np
 import gdal
 
 # Open the HDF5 file in read mode
-with h5py.File("./SIH2024/3RIMG_04SEP2024_1615_L1B_STD_V01R00.h5", "r") as hdf:
+with h5py.File("./SIH2024/3RIMG_04SEP2024_1015_L1B_STD_V01R00.h5", "r") as hdf:
     # List all groups
     print("Keys:", list(hdf.keys()))
 
@@ -13,18 +13,28 @@ with h5py.File("./SIH2024/3RIMG_04SEP2024_1615_L1B_STD_V01R00.h5", "r") as hdf:
     data = np.array(dataset)
     print(data)
 
-
+from osgeo import gdal
+import os
 single_band_array = np.squeeze(dataset, axis=0)
 # Remove the extra dimension by selecting the first slice
 # single_band_array = dataset[0, :, :]  # Shape now becomes (2816, 2805)
 
 # Define output file parameters
-output_filename = "output.tif"
+
 height, width = single_band_array.shape
 
 # Create a TIFF file using GDAL
 driver = gdal.GetDriverByName("GTiff")
-output_ds = driver.Create(output_filename, width, height, 1, gdal.GDT_Float32)
+
+
+output_folder = "outputs"
+output_filename = "output_file.tif"
+output_path = os.path.join(output_folder, output_filename)
+
+# Create the folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+output_ds = driver.Create(output_path, width, height, 1, gdal.GDT_Float32)
 
 # Optional: Set geotransform and projection if needed
 # geotransform = [x_min, pixel_width, 0, y_max, 0, -pixel_height]  # Set accordingly

@@ -9,7 +9,8 @@
 *.dylib
 *.tiff
 *.tif
-
+*.h5
+*.h5.aux.xml
 # Test binary, built with `go test -c`
 *.test
 
@@ -20,6 +21,7 @@
 # vendor/
 /venv
 pipeline/SIH2024
+/myenv
 
 # Go workspace file
 go.work
