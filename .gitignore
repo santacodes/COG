@@ -19,7 +19,7 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-/venv
+pipeline/venv
 pipeline/SIH2024
 /myenv
 

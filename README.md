@@ -13,6 +13,10 @@ pip install -r requirements.txt
 ## Setting up GDAL 
 
 ```bash
-pip install numpy>1.0.0 wheel setuptools>=67
+pip install numpy>2.0.0 wheel setuptools>=67
 pip install gdal[numpy]=="$(gdal-config --version).*"
+```
+or 
+```bash
+pip install --no-cache --force-reinstall gdal[numpy]=="$(gdal-config --version).*"
 ```
