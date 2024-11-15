@@ -3,11 +3,7 @@ import numpy as np
 from osgeo import gdal
 
 # Open the HDF5 file in read mode
-<<<<<<< Updated upstream
-with h5py.File("./SIH2024/3RIMG_04SEP2024_1015_L1C_STD_V01R00.h5", "r") as hdf:
-=======
 with h5py.File("./SIH2024/3RIMG_04SEP2024_1715_L2B_HEM_V01R00.h5", "r") as hdf:
->>>>>>> Stashed changes
     # List all groups
     print("Keys:", list(hdf.keys()))
     # Access data
@@ -16,15 +12,10 @@ with h5py.File("./SIH2024/3RIMG_04SEP2024_1715_L2B_HEM_V01R00.h5", "r") as hdf:
     data = np.array(dataset)
     print(data)
 
-<<<<<<< Updated upstream
-from osgeo import gdal
-import os
-=======
     for i in list(hdf.keys()):
         print(i)
         print(hdf[i][:].shape)
 
->>>>>>> Stashed changes
 single_band_array = np.squeeze(dataset, axis=0)
 # Remove the extra dimension by selecting the first slice
 # single_band_array = dataset[0, :, :]  # Shape now becomes (2816, 2805)
