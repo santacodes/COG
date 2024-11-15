@@ -3,7 +3,7 @@ import numpy as np
 import gdal
 
 # Open the HDF5 file in read mode
-with h5py.File("./SIH2024/3RIMG_04SEP2024_1015_L1B_STD_V01R00.h5", "r") as hdf:
+with h5py.File("./SIH2024/3RIMG_04SEP2024_1015_L1C_STD_V01R00.h5", "r") as hdf:
     # List all groups
     print("Keys:", list(hdf.keys()))
 

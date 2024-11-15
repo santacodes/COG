@@ -21,4 +21,4 @@ def check_geotiff(filename):
     dataset = None
 
 # Run the function on your files
-check_geotiff("output_georefffftiff.tiff")
+check_geotiff("output_georefffftiff.tif")
