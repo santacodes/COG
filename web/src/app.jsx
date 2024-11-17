@@ -152,6 +152,7 @@ class ConnectedApp extends Component {
   }
 }
 
-const App = hot(module)(connect(mapStateToProps, mapDispatchToProps)((ConnectedApp)));
+const App = connect(mapStateToProps, mapDispatchToProps)(ConnectedApp);
+
 
 export default App;
