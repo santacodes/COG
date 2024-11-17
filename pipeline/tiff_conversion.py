@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 from osgeo import gdal
-
+import os
 # Open the HDF5 file in read mode
 with h5py.File("./SIH2024/3RIMG_04SEP2024_1715_L2B_HEM_V01R00.h5", "r") as hdf:
     # List all groups

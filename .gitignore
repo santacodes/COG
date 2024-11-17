@@ -31,4 +31,5 @@ go.work.sum
 # env file
 .env
 1.0.0
+2.0.0
 =67
