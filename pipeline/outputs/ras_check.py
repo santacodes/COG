@@ -14,8 +14,7 @@ def check_geotransform(file_path):
         print(f"Error: {e}")
 
 # Path to your file
-file_path = "path/to/your/file.tif"
-check_geotransform(file_path)
+
 
 def check_tiff_type(file_path):
     try:
@@ -29,8 +28,8 @@ def check_tiff_type(file_path):
         print("The file is not a valid TIFF or GeoTIFF.")
 
 # Path to your file
-input_files = ['IMG_MIR.tif', 'IMG_SWIR.tif', 'IMG_TIR1.tif', 'IMG_TIR2.tif', 'IMG_VIS.tif', 'IMG_WV.tif', 'Sat_Azimuth.tif', 'Sat_Elevation.tif', 'Sun_Azimuth.tif', 'Sun_Elevation.tif']
-
+#input_files = ['IMG_MIR.tif', 'IMG_SWIR.tif', 'IMG_TIR1.tif', 'IMG_TIR2.tif', 'IMG_VIS.tif', 'IMG_WV.tif', 'Sat_Azimuth.tif', 'Sat_Elevation.tif', 'Sun_Azimuth.tif', 'Sun_Elevation.tif']
+input_files = ['demo_L1B.tif']
 for file_path in input_files:
     check_tiff_type(file_path)
     check_geotransform(file_path)

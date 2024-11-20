@@ -4,12 +4,13 @@ from rasterio.transform import from_bounds
 from rasterio.crs import CRS
 import numpy as np
 # Input and output file paths
-unique_name="3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00"
+unique_name="3RIMG_04SEP2024_1045_L1C_ASIA_MER_V01R00"
 hdf5_file = "./SIH2024/"+unique_name+".h5"
 
 image_files=[]
 # Read the HDF5 file
 with h5py.File(hdf5_file, 'r') as hdf:
+    
     for key in hdf.keys():
         # print(key)
         data = hdf[key][:]
