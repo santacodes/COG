@@ -1,6 +1,6 @@
-#ifndef GDAL_BIND_H
-#define GDAL_BIND_H
+#ifndef CGET_HDF5_METADATA_ATTRIBUTES_H
+#define CGET_HDF5_METADATA_ATTRIBUTES_H
 
 char *CgetHDF5MetadataAttributes(const char *filename);
 
-#endif // GDAL_BIND_H
+#endif // CGET_HDF5_METADATA_ATTRIBUTES_H
