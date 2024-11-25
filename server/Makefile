@@ -1,38 +1,39 @@
 # Variables
 CC = gcc
 GO = go
-CFLAGS = -I/usr/include/gdal
-LDFLAGS = -L/usr/lib -lgdal -lhdf5
-C_OUTPUT = c_bindings/libinsat_bindings.so
-GO_OUTPUT = cog
-
-# C source files
-C_SRCS = c_bindings/insat_metadata.c c_bindings/toGeoTiff.c
-C_OBJS = $(C_SRCS:.c=.o)
-
-# Targets
-.PHONY: all clean run
+CFLAGS = -fPIC -I/usr/include/gdal
+LDFLAGS = -L./build -linsat_bindings -L/usr/lib -lgdal -lhdf5
+BUILD_DIR = build
+C_SRCS = c_bindings/insat_metadata.c c_bindings/merge_tiff.c c_bindings/toGeoTiff.c
+C_OBJS = $(patsubst c_bindings/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
+C_LIB = $(BUILD_DIR)/libinsat_bindings.so
+GO_OUTPUT = cog_server
 
 # Default target
-all: $(C_OUTPUT) $(GO_OUTPUT)
+.PHONY: all clean run
+all: $(C_LIB) $(GO_OUTPUT)
 
-# Compile the shared C library
-$(C_OUTPUT): $(C_OBJS)
+# Compile the shared library
+$(C_LIB): $(C_OBJS)
 	$(CC) -shared -o $@ $^ $(LDFLAGS)
 
-# Compile the C sources into object files
-%.o: %.c
-	$(CC) -fPIC -c $< $(CFLAGS)
+# Compile C source files to object files
+$(BUILD_DIR)/%.o: c_bindings/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Create the build directory if it doesn't exist
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 # Build the Go binary
-$(GO_OUTPUT): main.go $(C_OUTPUT)
-	CGO_CFLAGS="$(CFLAGS)" CGO_LDFLAGS="-L$(PWD)/c_bindings -linsat_bindings $(LDFLAGS)" $(GO) build -o $@ ./main.go
+$(GO_OUTPUT): main.go $(C_LIB)
+	LD_LIBRARY_PATH=$(BUILD_DIR) $(GO) build -o $@ ./main.go
 
-# Clean build artifacts
+# Clean up build artifacts
 clean:
-	rm -f $(C_OBJS) $(C_OUTPUT) $(GO_OUTPUT)
+	rm -rf $(BUILD_DIR) $(GO_OUTPUT)
 
 # Run the program
 run: all
-	LD_LIBRARY_PATH=$(PWD)/c_bindings ./$(GO_OUTPUT)
+	LD_LIBRARY_PATH=$(BUILD_DIR) ./$(GO_OUTPUT)
 
