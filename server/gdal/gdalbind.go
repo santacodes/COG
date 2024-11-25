@@ -2,8 +2,8 @@ package COG
 
 /*
 #cgo pkg-config: hdf5
-#cgo CFLAGS: -I/usr/include/gdal
-#cgo LDFLAGS: -L./build -linsat_bindings -L/usr/lib -lgdal -lhdf5
+#cgo CFLAGS: -I./c_bindings
+#cgo LDFLAGS: -L./c_bindings/build -linsat_bindings -L/usr/lib -lgdal -lhdf5
 #include "c_bindings/insat_metadata.h"
 #include <stdlib.h>
 */
@@ -12,6 +12,7 @@ import (
 	"unsafe"
 )
 
+// GetMetadataAttributes retrieves metadata attributes from the given filename.
 func GetMetadataAttributes(filename string) string {
 	// Convert Go string to C string
 	cFilename := C.CString(filename)
@@ -22,6 +23,5 @@ func GetMetadataAttributes(filename string) string {
 	defer C.free(unsafe.Pointer(cResult))
 
 	// Convert C string to Go string and return the result
-	result := C.GoString(cResult)
-	return result
+	return C.GoString(cResult)
 }
