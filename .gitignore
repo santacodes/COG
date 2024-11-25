@@ -26,6 +26,7 @@ server
 pipeline/venv
 pipeline/SIH2024
 /myenv
+server/gdal/c_bindings/build
 
 # Go workspace file
 go.work
