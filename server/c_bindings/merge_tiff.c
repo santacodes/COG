@@ -93,19 +93,19 @@ void mergeGeoTIFFs(const char *outputPath, const char **inputPaths, int numBands
     printf("Successfully merged %d single-band GeoTIFFs into %s.\n", numBands, outputPath);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <output_tif> <input_tif1> <input_tif2> ...\n", argv[0]);
-        return 1;
-    }
+// int main(int argc, char *argv[]) {
+//     if (argc < 3) {
+//         printf("Usage: %s <output_tif> <input_tif1> <input_tif2> ...\n", argv[0]);
+//         return 1;
+//     }
 
-    const char *outputPath = argv[1];
-    const char **inputPaths = (const char **)&argv[2];
-    int numBands = argc - 2;
+//     const char *outputPath = argv[1];
+//     const char **inputPaths = (const char **)&argv[2];
+//     int numBands = argc - 2;
 
-    mergeGeoTIFFs(outputPath, inputPaths, numBands);
+//     mergeGeoTIFFs(outputPath, inputPaths, numBands);
 
-    return 0;
-}
+//     return 0;
+// }
 // to compile   gcc -o merge_tiff merge_tiff.c -lgdal -I /usr/include/gdal
 //to run    ./merge_tiff output_multiband.tif output_MIR.tif output_TIR1.tif
