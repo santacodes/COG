@@ -7,7 +7,7 @@ BUILD_DIR = gdal/c_bindings/build
 C_SRCS = gdal/c_bindings/insat_metadata.c gdal/c_bindings/merge_tiff.c gdal/c_bindings/toGeoTiff.c
 C_OBJS = $(patsubst gdal/c_bindings/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
 C_LIB = $(BUILD_DIR)/libinsat_bindings.so
-GO_OUTPUT = server
+GO_OUTPUT = cogserver
 
 # Default target
 .PHONY: all clean run

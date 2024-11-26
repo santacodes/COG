@@ -14,19 +14,20 @@
 # Test binary, built with `go test -c`
 *.test
 *.xml
+*.crt
+*.key
 *.o
 COG
-server
-
+server/gdal/c_bindings/build
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+cogserver
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
 pipeline/venv
 pipeline/SIH2024
 /myenv
-server/gdal/c_bindings/build
 
 # Go workspace file
 go.work

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/santacodes/COG/fiberhttp"
 	"github.com/santacodes/COG/gdal"
 )
 
@@ -13,4 +14,5 @@ func main() {
 
 	// Print the metadata
 	fmt.Println(metadata)
+	fiberhttp.Run_COG()
 }
