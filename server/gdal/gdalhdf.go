@@ -3,7 +3,7 @@ package COG
 /*
 #cgo pkg-config: hdf5
 #cgo CFLAGS: -I./c_bindings
-#cgo LDFLAGS: -L./c_bindings/build -linsat_bindings -L/usr/lib -lgdal -lhdf5
+#cgo LDFLAGS: -L./c_bindings/build -linsat_bindings -L/usr/lib -lgdal
 #include "c_bindings/insat_metadata.h"
 #include <stdlib.h>
 */
