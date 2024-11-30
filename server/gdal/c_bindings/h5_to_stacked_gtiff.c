@@ -1,6 +1,6 @@
 #include "cpl_conv.h" // For CPLMalloc
 #include "gdal.h"
-#include <omp.h> // OpenMP for parallel processing
+#include <omp.h> // OpenMP for parallel processing NOTE: this is more portable across windows and unix. Dont use pthreads
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
