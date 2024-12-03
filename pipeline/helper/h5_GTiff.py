@@ -39,7 +39,7 @@ with h5py.File(hdf5_file, 'r') as hdf:
         
             # Compute the transform
             transform = from_bounds(left, bottom, right, top, width, height)
-            output_tiff_path="./outputs/"+key+"_L1C.tif"
+            output_tiff_path="./outputs/"+key+".tif"
             image_files.append(output_tiff_path)
             # Write the dataset to a GeoTIFF file
             with rasterio.open(
@@ -57,29 +57,29 @@ with h5py.File(hdf5_file, 'r') as hdf:
 
             print(f"GeoTIFF file created successfully: {output_tiff_path}")
             
-print(image_files)
-# images = [imageio.v2.imread(img) for img in image_files]
+# print(image_files)
+# # images = [imageio.v2.imread(img) for img in image_files]
 
-# Save stacked images into one TIFF file
-datasets = [rasterio.open(f) for f in image_files]
+# # Save stacked images into one TIFF file
+# datasets = [rasterio.open(f) for f in image_files]
 
-# Check that all images have the same dimensions
-width, height = datasets[0].width, datasets[0].height
-if not all(ds.width == width and ds.height == height for ds in datasets):
-    raise ValueError("All input images must have the same dimensions.")
+# # Check that all images have the same dimensions
+# width, height = datasets[0].width, datasets[0].height
+# if not all(ds.width == width and ds.height == height for ds in datasets):
+#     raise ValueError("All input images must have the same dimensions.")
 
-# Metadata for the output file
-meta = datasets[0].meta.copy()
-meta.update({"count": len(datasets), "dtype": datasets[0].dtypes[0]})
+# # Metadata for the output file
+# meta = datasets[0].meta.copy()
+# meta.update({"count": len(datasets), "dtype": datasets[0].dtypes[0]})
 
-# Write to a new multi-band TIFF
-output_file = './outputs/'+"demostack.tif"
-with rasterio.open(output_file, "w", **meta) as dst:
-    for idx, ds in enumerate(datasets, start=1):
-        dst.write(ds.read(1), idx)  # Write each band to the output
+# # Write to a new multi-band TIFF
+# output_file = './outputs/'+"demostack.tif"
+# with rasterio.open(output_file, "w", **meta) as dst:
+#     for idx, ds in enumerate(datasets, start=1):
+#         dst.write(ds.read(1), idx)  # Write each band to the output
 
-# Close datasets
-for ds in datasets:
-    ds.close()
+# # Close datasets
+# for ds in datasets:
+#     ds.close()
 
-print(f"Stacked TIFF saved as {output_file}")
+# print(f"Stacked TIFF saved as {output_file}")

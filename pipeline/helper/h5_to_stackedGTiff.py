@@ -3,9 +3,11 @@ import rasterio
 from rasterio.transform import from_bounds
 from rasterio.crs import CRS
 import numpy as np
-
+import time
+# record start time
+start = time.time()
 # Input and output file paths
-hdf5_file = "./SIH2024/3RIMG_04SEP2024_1045_L1C_ASIA_MER_V01R00.h5"
+hdf5_file = "./3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5"
 output_tiff_path = "./outputs/stacked_L1C.tif"
 
 # Read the HDF5 file
@@ -56,3 +58,4 @@ with h5py.File(hdf5_file, 'r') as hdf:
             print(f"Written subdataset '{key}' to band {i}")
 
 print(f"Stacked GeoTIFF file created successfully: {output_tiff_path}")
+print("--- %s seconds ---" % (time.time() - start))
