@@ -1,79 +1,78 @@
-import { useEffect, useRef } from "react";
-import "leaflet/dist/leaflet.css";
+import React, { useState, useEffect } from 'react';
+import { Map, View } from 'ol';
+import TileLayer from 'ol/layer/WebGLTile';
+import GeoTIFF from 'ol/source/GeoTIFF';
+import 'ol/ol.css';
+import { fromUrl } from 'geotiff';
+import { OSM } from 'ol/source';
 
-// Function to change the pixel values to color, customize this as needed
-const pixelValuesToColorFn = (values) => {
-  const value = values[0];
-  if (value === -99.0 || value === null) return null;
+// Function to debug GeoTIFF and extract min/max values from metadata
+async function debugGeoTIFF(url) {
+  const tiff = await fromUrl(url);
+  const image = await tiff.getImage(0);
+  const metadata = image.getFileDirectory();
 
-  const intensity = Math.round((value / 255) * 255);
-  return `rgb(${intensity}, ${intensity}, ${intensity})`;
-};
+  const minPixelValue = metadata['STATISTICS_MINIMUM'];
+  const maxPixelValue = metadata['STATISTICS_MAXIMUM'];
 
-const LeafletMap = () => {
-  const mapRef = useRef(null);
+  console.log('Metadata Min Value:', minPixelValue);
+  console.log('Metadata Max Value:', maxPixelValue);
 
+  return { min: 14, max: 551};
+}
+
+function MapComponent() {
   useEffect(() => {
-    if (mapRef.current) {
-      return;
-    }
+    const url = 'https://127.0.0.1:8443/cog/stacked_new.tif'; // Update with your COG URL
 
-    const L = require("leaflet");
-    const parseGeoraster = require("georaster");
-    const GeoRasterLayer = require("georaster-layer-for-leaflet");
+    debugGeoTIFF(url).then(({ min, max }) => {
+      console.log('Min/Max values:', min, max);
 
-    const map = L.map("map", {
-      maxBounds: [
-        [-90, -180],
-        [90, 180],
-      ],
-      maxBoundsViscosity: 1.0,
-    }).setView([20, 90], 4); // Centered roughly over Asia
-    mapRef.current = map;
-
-    // Load GeoTIFF and set it as the base layer
-    const urlToGeoTiffFile = "https://127.0.0.1:8443/cog/output_cog.tif";
-    parseGeoraster(urlToGeoTiffFile).then((georaster) => {
-      const cogLayer = new GeoRasterLayer({
-        attribution: "Planet",
-        georaster: georaster,
-        pixelValuesToColorFn: pixelValuesToColorFn,
-        resolution: 128,
+      // Set the normalization or processing using the retrieved min/max values
+      const osmLayer = new TileLayer({
+        preload: Infinity,
+        source: new OSM(),
       });
 
-      cogLayer.addTo(map);
-      map.fitBounds(cogLayer.getBounds());
-    });
-
-    // Add GeoJSON layer for the Asian boundary
-    const asiaBoundaryUrl = "https://127.0.0.1:8443/cog/IND.geo.json"; // Replace with actual URL or path
-    fetch(asiaBoundaryUrl)
-      .then((response) => response.json())
-      .then((geojson) => {
-        const asiaBoundaryLayer = L.geoJSON(geojson, {
-          style: {
-            color: "red",
-            weight: 2,
-            opacity: 0.8,
+      const source = new GeoTIFF({
+        sources: [
+          {
+            url: url,
           },
-        });
-        asiaBoundaryLayer.addTo(map);
-      })
-      .catch((error) => {
-        console.error("Error loading GeoJSON:", error);
+        ],
+        normalize: true,
+        projection: 'EPSG:4326',
+        wrapX: false,
       });
+      console.log(source)
+      const insatMap = new TileLayer({
+        source: source,
+        style: {
+          color: [
+            'array',
+            ['band', 2], // Single-band visualization
+            ['band', 2],
+            ['band', 2],
+            255, // Alpha (opacity)
+          ],
+        },
+      });
+      console.log(insatMap)
+      const map = new Map({
+        target: 'map',
+        layers: [osmLayer, insatMap],
+        view: new View({
+          projection: 'EPSG:4326',
+          center: [0, 0],
+          zoom: 0,
+        }),
+      });
+
+      return () => map.setTarget('map');
+    });
   }, []);
 
-  return (
-    <div
-      id="map"
-      style={{
-        height: "100vh",
-        width: "100vw",
-        position: "absolute",
-      }}
-    />
-  );
-};
+  return <div id="map" className="map-container" style={{ height: '1000px', width: '100%' }} />;
+}
 
-export default LeafletMap;
+export default MapComponent;
