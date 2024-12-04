@@ -4,7 +4,7 @@ import os
 
 # Define the port to host on
 PORT = 9090
-IMAGE_DIR = "image"  # Directory containing the image(s)
+IMAGE_DIR = "/home/jayavishnu/Documents/1738SIH/COG/pipeline/outputs/"  # Directory containing the image(s)
 
 # Change the working directory to serve the images
 os.chdir(IMAGE_DIR)

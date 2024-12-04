@@ -71,7 +71,7 @@ def create_stacked_COG(hdf5_file,output_cog_path):
                     if dataset.shape != (width, height):
                         raise ValueError(f"Dataset {key} has incompatible dimensions.")
                     dst.write(dataset, i)  # Write the dataset to the corresponding band
-                    dst.set_band_description(1, key)
+                    dst.set_band_description(i, key)
                     print(f"Written subdataset '{key}' to band {i}")
 
     print(f"Stacked GeoTIFF(COG) file created successfully: {output_cog_path}")
@@ -79,7 +79,7 @@ def create_stacked_COG(hdf5_file,output_cog_path):
 
 if __name__ == "__main__":
     start_time = time.time()
-    create_stacked_COG("./SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5","./outputs/L1C/stackdemo.tif")
+    create_stacked_COG("./3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5","./stacked.tif")
     end_time = time.time()
     print(f"Runtime: {end_time - start_time:.2f} seconds")
 

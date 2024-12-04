@@ -10,6 +10,9 @@
     "dependencies": {
         "@heroicons/react": "^2.2.0",
         "@material-tailwind/react": "^2.1.10",
+        "cesium": "^1.124.0",
+        "copy-webpack-plugin": "^12.0.2",
+        "css-loader": "^7.1.2",
         "deck.gl": "^9.0.36",
         "georaster": "^1.6.0",
         "georaster-layer-for-leaflet": "^1.0.2",
@@ -18,7 +21,8 @@
         "next": "13.0.0",
         "ol": "10.2.1",
         "react": "18.2.0",
-        "react-dom": "18.2.0"
+        "react-dom": "18.2.0",
+        "style-loader": "^4.0.0"
     },
     "devDependencies": {
         "tailwindcss": "^3.4.15"

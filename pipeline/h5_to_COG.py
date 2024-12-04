@@ -23,7 +23,7 @@ def convertToCOG(hdf5_file,output_dir):
         left=metadata.get('left_longitude', 0) 
         right=metadata.get('right_longitude', 0) 
         print(top, bottom, left, right)
-        crs = CRS.from_epsg(4326)  # WGS84 CRS
+        crs = CRS.from_epsg(3857)  # WGS84 CRS
             
         if not top or not right or not left or not right:
                 raise ValueError("Required georeferencing metadata is missing in the HDF5 file.")
@@ -43,7 +43,7 @@ def convertToCOG(hdf5_file,output_dir):
             
                 # Compute the transform
                 transform = from_bounds(left, bottom, right, top, width, height)
-                output_tiff_path=output_dir+key+".tif"
+                output_tiff_path=output_dir+key+"3857.tif"
                 # image_files.append(output_tiff_path)
                 # Write the dataset to a GeoTIFF file
 
@@ -62,7 +62,7 @@ def convertToCOG(hdf5_file,output_dir):
                         crs=crs,
                         transform=transform,
                         BLOCKSIZE=512,  # Tile size
-                        COMPRESS="DEFLATE",  # Compression method
+                        COMPRESS="LZW",  # Compression method
                         RESAMPLING=Resampling.nearest,
                     ) as dst:
                         dst.write(dataset, 1)  # Write the dataset to band 1
@@ -72,7 +72,7 @@ def convertToCOG(hdf5_file,output_dir):
 
 if __name__ == "__main__":
     start_time = time.time()
-    convertToCOG("./SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5","./outputs/L1C/")
+    convertToCOG("./3RIMG_04SEP2024_1015_L1B_STD_V01R00.h5","./outputs/")
     end_time = time.time()
     print(f"Runtime: {end_time - start_time:.2f} seconds")
 

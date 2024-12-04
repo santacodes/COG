@@ -1,9 +1,12 @@
-import dynamic from "next/dynamic";
+import dynamic from 'next/dynamic'
 
-const LeafletMap = dynamic(() => import("../components/insat"), { ssr: false });
+const Map = dynamic(() => import('../components/map'), {
+  ssr: false,
+})
+const CesiumViewer = dynamic(() => import('../components/CesiumViewer'), {
+  ssr: false,
+})
 
-const MapPage = () => {
-  return <LeafletMap />;
-};
-
-export default MapPage;
+export default () => {
+  return <CesiumViewer />
+}

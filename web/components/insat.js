@@ -28,10 +28,21 @@ function MapComponent() {
     debugGeoTIFF(url).then(({ min, max }) => {
       console.log('Min/Max values:', min, max);
 
+<<<<<<< Updated upstream
       // Set the normalization or processing using the retrieved min/max values
       const osmLayer = new TileLayer({
         preload: Infinity,
         source: new OSM(),
+=======
+    // Load GeoTIFF and set it as the base layer
+    const urlToGeoTiffFile = "http://localhost:9090/IMG_MIR.tif";
+    parseGeoraster(urlToGeoTiffFile).then((georaster) => {
+      const cogLayer = new GeoRasterLayer({
+        attribution: "Planet",
+        georaster: georaster,
+        pixelValuesToColorFn: pixelValuesToColorFn,
+        resolution: 128,
+>>>>>>> Stashed changes
       });
 
       const source = new GeoTIFF({
