@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 const COGDir = "./image" // Directory where your COG files are stored
@@ -36,10 +37,10 @@ func serveCOG(c *fiber.Ctx) error {
 	}
 
 	// Set HTTP headers for COG streaming
-	c.Set("Content-Type", "image/tiff")             // Correct MIME type for TIFF
-	c.Set("Accept-Ranges", "bytes")                // Enable range requests
-	c.Set("Content-Length", string(fileInfo.Size())) // File size in bytes
-	c.Set("Cache-Control", "public, max-age=86400") // Caching for one day
+	c.Set("Content-Type", "image/tiff")                             // Correct MIME type for TIFF
+	c.Set("Accept-Ranges", "bytes")                                 // Enable range requests
+	c.Set("Content-Length", strconv.FormatInt(fileInfo.Size(), 10)) // File size in bytes
+	c.Set("Cache-Control", "public, max-age=86400")                 // Caching for one day
 	c.Set("Last-Modified", fileInfo.ModTime().UTC().Format(http.TimeFormat))
 
 	// Serve the file, handling range requests automatically
@@ -73,5 +74,5 @@ func Run_COG() {
 
 	// Start the Fiber server on port 8443 (HTTPS)
 	log.Println("Starting HTTPS server on port 8443...")
-	log.Fatal(app.ListenTLS(":8443", certFile, keyFile))
+	log.Fatal(app.Listen(":8443"))
 }
