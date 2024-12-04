@@ -22,30 +22,38 @@ int main(int argc, char *argv[]) {
   GDALAllRegister();
 
   // Open the HDF5 file
-  GDALDatasetH hDataset = GDALOpen(hdf5_file, GA_ReadOnly);
+  // GDALDatasetH hDataset = GDALOpen(hdf5_file, GA_ReadOnly);
+  GDALDatasetH hDataset = GDALOpenEx(hdf5_file, GDAL_OF_READONLY | GDAL_OF_RASTER, NULL, NULL, NULL);
+
   if (hDataset == NULL) {
     printf("Error: Unable to open HDF5 file '%s'.\n", hdf5_file);
     return 1;
   }
 
   // Read georeferencing metadata
-  double top = 0, bottom = 0, left = 0, right = 0;
-  if (!(GDALGetMetadataItem(hDataset, "upper_latitude", NULL) &&
-        GDALGetMetadataItem(hDataset, "lower_latitude", NULL) &&
-        GDALGetMetadataItem(hDataset, "left_longitude", NULL) &&
-        GDALGetMetadataItem(hDataset, "right_longitude", NULL))) {
+double top = 0, bottom = 0, left = 0, right = 0;
+
+// Fetch all required metadata at once
+const char *upper_lat = GDALGetMetadataItem(hDataset, "upper_latitude", NULL);
+const char *lower_lat = GDALGetMetadataItem(hDataset, "lower_latitude", NULL);
+const char *left_lon = GDALGetMetadataItem(hDataset, "left_longitude", NULL);
+const char *right_lon = GDALGetMetadataItem(hDataset, "right_longitude", NULL);
+
+// Validate all metadata in a single check
+if (!(upper_lat && lower_lat && left_lon && right_lon)) {
     printf("Error: Required georeferencing metadata is missing.\n");
     GDALClose(hDataset);
     return 1;
-  }
+}
 
-  top = atof(GDALGetMetadataItem(hDataset, "upper_latitude", NULL));
-  bottom = atof(GDALGetMetadataItem(hDataset, "lower_latitude", NULL));
-  left = atof(GDALGetMetadataItem(hDataset, "left_longitude", NULL));
-  right = atof(GDALGetMetadataItem(hDataset, "right_longitude", NULL));
+// Convert metadata to double
+top = atof(upper_lat);
+bottom = atof(lower_lat);
+left = atof(left_lon);
+right = atof(right_lon);
 
-  printf("Bounding Box: top=%f, bottom=%f, left=%f, right=%f\n", top, bottom,
-         left, right);
+// Print the bounding box
+printf("Bounding Box: top=%f, bottom=%f, left=%f, right=%f\n", top, bottom, left, right);
 
   // Get the list of subdatasets
   char **subdatasets = GDALGetMetadata(hDataset, "SUBDATASETS");
