@@ -74,5 +74,5 @@ func Run_COG() {
 
 	// Start the Fiber server on port 8443 (HTTPS)
 	log.Println("Starting HTTPS server on port 8443...")
-	log.Fatal(app.Listen(":8443"))
+	log.Fatal(app.Listen(":8443")) // Change this to app.ListenTLS(":8443", certFile, keyFile) for HTTPS
 }

@@ -1,51 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/WebGLTile';
 import GeoTIFF from 'ol/source/GeoTIFF';
 import 'ol/ol.css';
 import { fromUrl } from 'geotiff';
+import WebGLTileLayer from 'ol/layer/WebGLTile';
 import { OSM } from 'ol/source';
+import VectorSource from 'ol/source/Vector';
+import GeoJSON from 'ol/format/GeoJSON';
+import VectorLayer from 'ol/layer/Vector';
 
-// Function to debug GeoTIFF and extract min/max values from metadata
-async function debugGeoTIFF(url) {
+// Function to load and process the GeoTIFF COG file
+async function loadGeoTIFF(url) {
   const tiff = await fromUrl(url);
-  const image = await tiff.getImage(0);
-  const metadata = image.getFileDirectory();
+  const image = await tiff.getImage(0); // Get the first image from the COG
+  const data = await image.readRasters();
 
-  const minPixelValue = metadata['STATISTICS_MINIMUM'];
-  const maxPixelValue = metadata['STATISTICS_MAXIMUM'];
+  // Select the first band (or any band you need)
+  const bandData = data[0]; // Assuming the first band is what you want
 
-  console.log('Metadata Min Value:', minPixelValue);
-  console.log('Metadata Max Value:', maxPixelValue);
-
-  return { min: 14, max: 551};
+  // Normalize the data to a grayscale range (0-255)
+  const min = 777
+  const max = 993
+  const normalizedData = bandData.map(value => {
+    return Math.round(((value - min) / (max - min)) / 255); // Normalize to 0-255 range
+  });
+  console.log(bandData)
+  return { bandData: normalizedData, min, max };
 }
 
 function MapComponent() {
   useEffect(() => {
-    const url = 'http://127.0.0.1:8443/cog/stacked_new.tif'; // Update with your COG URL
+    const url = 'http://127.0.0.1:8443/cog/stacked.tif'; // Replace with your COG file URL
 
-    debugGeoTIFF(url).then(({ min, max }) => {
-      console.log('Min/Max values:', min, max);
+    loadGeoTIFF(url).then(({ bandData, min, max }) => {
+      console.log('Min:', min, 'Max:', max); // Log min/max of the band
 
-      // Set the normalization or processing using the retrieved min/max values
-      const osmLayer = new TileLayer({
-        preload: Infinity,
-        source: new OSM(),
-      });
-
+      // Create a custom WebGLTileLayer to display the grayscale image
       const source = new GeoTIFF({
         sources: [
           {
             url: url,
-          },
-        ],
-        normalize: true,
-        projection: 'EPSG:4326',
-        wrapX: false,
+            bands: [1,2], // Use band 1 (or any band you want)
+            max: 551,
+            min: 14,
+          }
+        ]
       });
-      console.log(source)
-      const insatMap = new TileLayer({
+
+      const insatMap = new WebGLTileLayer({
         source: source,
         style: {
           color: [
@@ -53,14 +56,29 @@ function MapComponent() {
             ['band', 2], // Single-band visualization
             ['band', 2],
             ['band', 2],
-            255, // Alpha (opacity)
+            1,
           ],
         },
       });
-      console.log(insatMap)
+
+      const osmLayer = new TileLayer({
+        source: new OSM(),
+      });
+
+      const geojsonSource = new VectorSource({
+        // You can replace this URL with the path to your GeoJSON file
+        url: 'http://127.0.0.1:8443/cog/INDgeo.json',
+        format: new GeoJSON(),
+      });
+  
+      // Create a vector layer to display the GeoJSON
+      const vectorLayer = new VectorLayer({
+        source: geojsonSource,
+      });
+
       const map = new Map({
         target: 'map',
-        layers: [osmLayer, insatMap],
+        layers: [osmLayer, insatMap, vectorLayer],
         view: new View({
           projection: 'EPSG:4326',
           center: [0, 0],
@@ -68,11 +86,13 @@ function MapComponent() {
         }),
       });
 
-      return () => map.setTarget('map');
+      // Cleanup function to destroy the map when the component unmounts
+      return () => map.setTarget(null);
     });
-  }, []);
 
-  return <div id="map" className="map-container" style={{ height: '1000px', width: '100%' }} />;
+  }, []); // Empty dependency array ensures this effect runs once on mount
+
+  return <div id="map" style={{ width: '100%', height: '1000px' }}></div>;
 }
 
 export default MapComponent;
