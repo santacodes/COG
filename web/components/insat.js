@@ -11,6 +11,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
 import { load } from 'ol/Image';
 import { MinusCircleIcon } from '@heroicons/react/16/solid';
+import { normalize } from 'ol/color';
 
 // Function to load and process the GeoTIFF COG file
 const loadinsatGeoTIFF = async(url, band) => {
@@ -25,8 +26,8 @@ const loadinsatGeoTIFF = async(url, band) => {
         const gdalMetadata = image.getGDALMetadata();
         console.log("GDAL Metadata:", gdalMetadata);
         // Iterate through each band and get GDAL metadata
-        const MinMax = image.getGDALMetadata(band)
-        console.log(MinMax.min)
+        const MinMax = image.getGDALMetadata(band-1)
+        console.log(MinMax.min, MinMax.max)
         return {min: MinMax.min, max: MinMax.max}
     } catch (error) {
         console.error("Error processing COG:", error);
@@ -45,11 +46,12 @@ const initializeMap = async (url, band) => {
     sources: [
       {
         url: url,
-        bands: band, // Use band 1 (or any band you want)
+        bands: [1, 2, 3, 4, 5, 6], // Use band 1 (or any band you want)
         max: MinMax.max,
         min: MinMax.min,
       }
-    ]
+    ],
+    projection: 'ESPG:4326'
   });
   const insatMap = new WebGLTileLayer({
     source: source,
@@ -101,7 +103,7 @@ function MapComponent() {
         console.log(exampleLayer)
         map.setLayers([osmLayer, exampleLayer,vectorLayer])
       }
-      getInsatMap(url, 1)
+      getInsatMap(url, 4)
       // Cleanup function to destroy the map when the component unmounts
       return () => map.setTarget(null);
 
