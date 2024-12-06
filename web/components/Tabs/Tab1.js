@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./Tab1.module.css"; // Custom CSS for styling
-import { ChangeBand } from "../insat";
+import { ChangeBand } from "../insat_L1C";
 
 const Tab1 = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

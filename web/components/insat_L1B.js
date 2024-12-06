@@ -26,7 +26,7 @@ export async function ChangeBand(url, band) {
       // Iterate through each band and get GDAL metadata
       const MinMax = image.getGDALMetadata(band - 1);
       console.log(MinMax.min, MinMax.max);
-      return { min: MinMax.min, max: MinMax.max };
+      return { min: gdalMetadata.min, max: gdalMetadata.max };
     } catch (error) {
       console.error("Error processing COG:", error);
     }
@@ -43,7 +43,7 @@ export async function ChangeBand(url, band) {
       sources: [
         {
           url: url,
-          bands: [1, 2, 3, 4, 5, 6], // Use band 1 (or any band you want)
+          bands: [1], // Use band 1 (or any band you want)
           max: MinMax.max,
           min: MinMax.min,
         },
@@ -69,6 +69,7 @@ export async function ChangeBand(url, band) {
     console.log(band);
     const exampleLayer = await initializeMap(url, band);
     console.log(exampleLayer);
+    map.removeLayer();
     map.addLayer(exampleLayer);
     
   };
@@ -84,10 +85,10 @@ function MapComponent() {
       view: new View({
         projection: "EPSG:4326",
         center: [77.25,17.75],
-        zoom: 5,
+        zoom: 0,
       }),
     });
-    const url = "http://192.168.1.46:8443/cog/stacked.tif"; // Replace with your COG file URL
+    const url = "http://192.168.1.46:8443/cog/IMG_SWIR.tif"; // Replace with your COG file URL
 
     const osmLayer = new WebGLTileLayer({
       source: new OSM(),
@@ -105,8 +106,8 @@ function MapComponent() {
     map.addLayer(vectorLayer)
     // Create a vector layer to display the GeoJSON
   
-  
-    ChangeBand(url, 5);
+    
+    ChangeBand(url, 1);
     
     
 
