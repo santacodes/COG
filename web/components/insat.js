@@ -9,8 +9,8 @@ import { OSM } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-
-export async function ChangeBand(url, band, map, layers) {
+let map = new Map(null);
+export async function ChangeBand(url, band) {
   // Function to load and process the GeoTIFF COG file
   const loadinsatGeoTIFF = async (url, band) => {
     try {
@@ -65,47 +65,53 @@ export async function ChangeBand(url, band, map, layers) {
     return insatMap;
   };
 
-  const getInsatMap = async (url, band, map, layers) => {
+  const getInsatMap = async (url, band) => {
     console.log(band);
     const exampleLayer = await initializeMap(url, band);
     console.log(exampleLayer);
-    await map.addLayer(exampleLayer);
+    map.addLayer(exampleLayer);
+    
   };
-  await getInsatMap(url, band, map, layers);
+  await getInsatMap(url, band);
   console.log('ends')
 }
 
 function MapComponent() {
   useEffect(() => {
+    map = new Map({
+      target: "map",
+      layers: [],
+      view: new View({
+        projection: "EPSG:4326",
+        center: [77.25,17.75],
+        zoom: 5,
+      }),
+    });
     const url = "http://192.168.1.46:8443/cog/stacked.tif"; // Replace with your COG file URL
 
     const osmLayer = new WebGLTileLayer({
       source: new OSM(),
     });
-
+    map.addLayer(osmLayer)
     const geojsonSource = new VectorSource({
       // You can replace this URL with the path to your GeoJSON file
       url: "http://192.168.1.46:8443/cog/INDgeo.json",
       format: new GeoJSON(),
     });
-
-    // Create a vector layer to display the GeoJSON
     const vectorLayer = new VectorLayer({
       source: geojsonSource,
     });
-
-    const map = new Map({
-      target: "map",
-      layers: [osmLayer, vectorLayer],
-      view: new View({
-        projection: "EPSG:4326",
-        center: [0, 0],
-        zoom: 0,
-      }),
-    });
-
-    ChangeBand(url, 1, map, [osmLayer, vectorLayer]);
+    // map.getLayers().insertAt(1,vectorLayer)
+    map.addLayer(vectorLayer)
+    // Create a vector layer to display the GeoJSON
+  
+  
+    ChangeBand(url, 5);
     
+    
+
+    
+    // map.addLayer(dummy)
     // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
   }, []); // Empty dependency array ensures this effect runs once on mount

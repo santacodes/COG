@@ -6,8 +6,7 @@ import styles from './SidePane.module.css';
 
 // Dynamic imports for tabs
 const Tab1 = dynamic(() => import('../Tabs/Tab1'));
-const Tab2 = dynamic(() => import('../Tabs/Tab2'));
-const Tab3 = dynamic(() => import('../Tabs/Tab3'));
+
 
 const SidePane = () => {
     const [activeTab, setActiveTab] = useState('tab1');

@@ -12,9 +12,11 @@ const Tab1 = () => {
 
   const sensorOptions = [
     "1",
-    "Sensor 2",
-    "Sensor 3",
-    "Sensor 4", // Add more sensor options as needed
+    "2",
+    "3",
+    "4", 
+    "5",
+    "6"// Add more sensor options as needed
   ];
 
   const layerOptions = [
@@ -64,9 +66,7 @@ const Tab1 = () => {
 
   const handleSensorChange = (e, id) => {
     const updatedSensor = parseInt(e.target.value, 10); // Get the selected sensor value
-    ChangeBand("http://192.168.1.46:8443/cog/stacked.tif", updatedSensor, 
-      
-    )
+    ChangeBand("http://192.168.1.46:8443/cog/stacked.tif", updatedSensor)
     console.log("Sensor selected:", updatedSensor); // Log the selected sensor name
     
     const updatedLayers = [...layers];
