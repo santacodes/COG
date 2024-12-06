@@ -9,65 +9,75 @@ import { OSM } from 'ol/source';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorLayer from 'ol/layer/Vector';
+import { load } from 'ol/Image';
+import { MinusCircleIcon } from '@heroicons/react/16/solid';
 
 // Function to load and process the GeoTIFF COG file
-async function loadGeoTIFF(url) {
-  const tiff = await fromUrl(url);
-  const image = await tiff.getImage(0); // Get the first image from the COG
-  const data = await image.readRasters();
+const loadinsatGeoTIFF = async(url, band) => {
+    try {
+        // Fetch the GeoTIFF file
+        const tiff = await fromUrl(url);
 
-  // Select the first band (or any band you need)
-  const bandData = data[0]; // Assuming the first band is what you want
+        // Read the first image (most COGs have one image)
+        const image = await tiff.getImage();
 
-  // Normalize the data to a grayscale range (0-255)
-  const min = 777
-  const max = 993
-  const normalizedData = bandData.map(value => {
-    return Math.round(((value - min) / (max - min)) / 255); // Normalize to 0-255 range
+        // Fetch metadata
+        const gdalMetadata = image.getGDALMetadata();
+        console.log("GDAL Metadata:", gdalMetadata);
+        // Iterate through each band and get GDAL metadata
+        const MinMax = image.getGDALMetadata(band)
+        console.log(MinMax.min)
+        return {min: MinMax.min, max: MinMax.max}
+    } catch (error) {
+        console.error("Error processing COG:", error);
+    }
+}
+
+
+const initializeMap = async (url, band) => {
+  const MinMax = await loadinsatGeoTIFF(url, band);
+  if (!MinMax) {
+    console.error("Failed to retrieve min/max values.");
+    return;
+  }
+  // Create a custom WebGLTileLayer to display the grayscale image
+  const source = new GeoTIFF({
+    sources: [
+      {
+        url: url,
+        bands: band, // Use band 1 (or any band you want)
+        max: MinMax.max,
+        min: MinMax.min,
+      }
+    ]
   });
-  console.log(bandData)
-  return { bandData: normalizedData, min, max };
+  const insatMap = new WebGLTileLayer({
+    source: source,
+    style: {
+      color: [
+        'array',
+        ['band', band], // Single-band visualization
+        ['band', band],
+        ['band', band],
+        1,
+      ],
+    },
+  });
+  return insatMap;
 }
 
 function MapComponent() {
   useEffect(() => {
-    const url = 'http://127.0.0.1:8443/cog/stacked.tif'; // Replace with your COG file URL
-
-    loadGeoTIFF(url).then(({ bandData, min, max }) => {
-      console.log('Min:', min, 'Max:', max); // Log min/max of the band
-
-      // Create a custom WebGLTileLayer to display the grayscale image
-      const source = new GeoTIFF({
-        sources: [
-          {
-            url: url,
-            bands: [1,2], // Use band 1 (or any band you want)
-            max: 551,
-            min: 14,
-          }
-        ]
-      });
-
-      const insatMap = new WebGLTileLayer({
-        source: source,
-        style: {
-          color: [
-            'array',
-            ['band', 2], // Single-band visualization
-            ['band', 2],
-            ['band', 2],
-            1,
-          ],
-        },
-      });
-
-      const osmLayer = new TileLayer({
+      const url = 'http://192.168.1.135:8443/cog/stacked.tif'; // Replace with your COG file URL
+     
+      
+      const osmLayer = new WebGLTileLayer({
         source: new OSM(),
       });
 
       const geojsonSource = new VectorSource({
         // You can replace this URL with the path to your GeoJSON file
-        url: 'http://127.0.0.1:8443/cog/INDgeo.json',
+        url: 'http://192.168.1.135:8443/cog/INDgeo.json',
         format: new GeoJSON(),
       });
   
@@ -78,7 +88,7 @@ function MapComponent() {
 
       const map = new Map({
         target: 'map',
-        layers: [osmLayer, insatMap, vectorLayer],
+        layers: [osmLayer, vectorLayer],
         view: new View({
           projection: 'EPSG:4326',
           center: [0, 0],
@@ -86,9 +96,14 @@ function MapComponent() {
         }),
       });
 
+      const getInsatMap = async(url, band) => {
+        const exampleLayer = await initializeMap(url, band);
+        console.log(exampleLayer)
+        map.setLayers([osmLayer, exampleLayer,vectorLayer])
+      }
+      getInsatMap(url, 1)
       // Cleanup function to destroy the map when the component unmounts
       return () => map.setTarget(null);
-    });
 
   }, []); // Empty dependency array ensures this effect runs once on mount
 
