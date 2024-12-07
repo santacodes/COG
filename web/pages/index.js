@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 
 // Dynamically importing components without SSR
-const LeafletMap = dynamic(() => import("../components/insat_L1B"), { ssr: false });
+const LeafletMap = dynamic(() => import("../components/insat_L1C"), { ssr: false });
 const SidePane = dynamic(() => import("../components/sidePane/SidePane"), { ssr: false });
 
 const MapPage = () => {
