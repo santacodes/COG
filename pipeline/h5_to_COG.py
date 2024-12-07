@@ -11,36 +11,34 @@ import time
 
 
 # image_files=[]
-def convertToCOG(hdf5_file,output_dir):
+def convertToCOG(hdf5_file, output_dir):
     # Read the HDF5 file
-    with h5py.File(hdf5_file, 'r') as hdf:
-
-
+    with h5py.File(hdf5_file, "r") as hdf:
         metadata = hdf["/"].attrs
-        #left, bottom, right, top                # Bounding box
-        top=metadata.get('upper_latitude', 0) 
-        bottom=metadata.get('lower_latitude', 0) 
-        left=metadata.get('left_longitude', 0) 
-        right=metadata.get('right_longitude', 0) 
+        # left, bottom, right, top                # Bounding box
+        top = metadata.get("upper_latitude", 0)
+        bottom = metadata.get("lower_latitude", 0)
+        left = metadata.get("left_longitude", 0)
+        right = metadata.get("right_longitude", 0)
         print(top, bottom, left, right)
         crs = CRS.from_epsg(4326)  # WGS84 CRS
             
         if not top or not right or not left or not right:
-                raise ValueError("Required georeferencing metadata is missing in the HDF5 file.")
-        
-        keys=["IMG_MIR","IMG_SWIR","IMG_TIR1","IMG_TIR2","IMG_VIS","IMG_WV"]
+            raise ValueError(
+                "Required georeferencing metadata is missing in the HDF5 file."
+            )
+
+        keys = ["IMG_MIR", "IMG_SWIR", "IMG_TIR1", "IMG_TIR2", "IMG_VIS", "IMG_WV"]
 
         for key in keys:
             # print(key)
             data = hdf[key][:]
-            print(key,data.shape)
-            if(data.ndim==3):
+            print(key, data.shape)
+            if data.ndim == 3:
                 dataset = np.squeeze(data, axis=0)
-            
-            
+
                 width, height = dataset.shape  # Dimensions
-            
-            
+
                 # Compute the transform
                 transform = from_bounds(left, bottom, right, top, width, height)
                 output_tiff_path=output_dir+key+".tif"
@@ -48,13 +46,13 @@ def convertToCOG(hdf5_file,output_dir):
                 # Write the dataset to a GeoTIFF file
 
                 with rasterio.Env(
-        GDAL_TIFF_INTERNAL_MASK=True,  # Required for COG
-        GDAL_CACHEMAX=512):  # Optional: Adjust based on available memory
-
+                    GDAL_TIFF_INTERNAL_MASK=True,  # Required for COG
+                    GDAL_CACHEMAX=512,
+                ):  # Optional: Adjust based on available memory
                     with rasterio.open(
                         output_tiff_path,
-                        'w',
-                        driver='COG',
+                        "w",
+                        driver="COG",
                         height=dataset.shape[0],
                         width=dataset.shape[1],
                         count=1,  # Single band
@@ -74,14 +72,13 @@ def convertToCOG(hdf5_file,output_dir):
                         dst.update_tags(band=key, min=band_min, max=band_max)
                     
                     print(f"GeoTIFF(COG) file created successfully: {output_tiff_path}")
-                
+
 
 if __name__ == "__main__":
     start_time = time.time()
     convertToCOG("../SIH2024/3RIMG_04SEP2024_1015_L1B_STD_V01R00.h5","./outputs/")
     end_time = time.time()
     print(f"Runtime: {end_time - start_time:.2f} seconds")
-
 
 
 # STACKING PROCESS
@@ -111,3 +108,4 @@ if __name__ == "__main__":
 #     ds.close()
 
 # print(f"Stacked TIFF saved as {output_file}")
+

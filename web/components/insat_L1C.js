@@ -77,7 +77,7 @@ export async function ChangeBand(url, band) {
   console.log('ends')
 }
 
-function MapComponent() {
+function L1CMapComponent() {
   useEffect(() => {
     map = new Map({
       target: "map",
@@ -88,7 +88,9 @@ function MapComponent() {
         zoom: 0,
       }),
     });
-    const url = "http://192.168.1.46:8443/cog/stacked.tif"; // Replace with your COG file URL
+    const url = "http://127.0.0.1:8443/cog/stacked.tif"; // Replace with your COG file URL
+    const baseurl = process.env.NEXT_PUBLIC_BASE_URL
+    console.log("this is the base url" + baseurl)
 
     const osmLayer = new WebGLTileLayer({
       source: new OSM(),
@@ -96,7 +98,7 @@ function MapComponent() {
     map.addLayer(osmLayer)
     const geojsonSource = new VectorSource({
       // You can replace this URL with the path to your GeoJSON file
-      url: "http://192.168.1.46:8443/cog/INDgeo.json",
+      url: "http://127.0.0.1:8443/cog/INDgeo.json",
       format: new GeoJSON(),
     });
     const vectorLayer = new VectorLayer({
@@ -120,4 +122,4 @@ function MapComponent() {
   return <div id="map" style={{ width: "100%", height: "1000px" }}></div>;
 }
 
-export default MapComponent;
+export default L1CMapComponent;
