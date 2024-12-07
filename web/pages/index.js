@@ -1,13 +1,17 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import WeatherChart from "../components/wrf";
 
 // Dynamically importing components without SSR
-const LeafletMap = dynamic(() => import("../components/insat_L1C"), { ssr: false });
-const SidePane = dynamic(() => import("../components/sidePane/SidePane"), { ssr: false });
+const LeafletMap = dynamic(() => import("../components/insat_L1C"), {
+  ssr: false,
+});
+const SidePane = dynamic(() => import("../components/sidePane/SidePane"), {
+  ssr: false,
+});
 
 const MapPage = () => {
   // return <LeafletMap />;
-
 
   const [isSidePaneOpen, setIsSidePaneOpen] = useState(true);
 
@@ -15,10 +19,11 @@ const MapPage = () => {
     setIsSidePaneOpen(!isSidePaneOpen);
   };
 
+  const lat = 21.166483858206583; 
+  const lon = 79.40917968750001; 
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       <LeafletMap />
-      
       {/* Toggle Button */}
       <button
         onClick={toggleSidePane}
@@ -38,7 +43,6 @@ const MapPage = () => {
       >
         {isSidePaneOpen ? "Close" : "Open"}
       </button>
-
       {/* SidePane */}
       {isSidePaneOpen && (
         <div
@@ -53,9 +57,12 @@ const MapPage = () => {
           <SidePane />
         </div>
       )}
+      <div>
+        <h1>Weather Chart</h1>
+        <WeatherChart lat={lat} lon={lon} />
+      </div>
     </div>
   );
-
 };
 
 export default MapPage;
