@@ -8,15 +8,14 @@ const Tab1 = () => {
   const [areLayersVisible, setAreLayersVisible] = useState(true);
   const [opacity, setOpacity] = useState(1);
   const [layers, setLayers] = useState([]);
-  
 
   const sensorOptions = [
-    "1",
-    "2",
-    "3",
-    "4", 
-    "5",
-    "6"// Add more sensor options as needed
+    { name: "sensor1", id: 1 },
+    { name: "sensor2", id: 2 },
+    { name: "sensor3", id: 3 },
+    { name: "sensor4", id: 4 },
+    { name: "sensor5", id: 5 },
+    { name: "sensor6", id: 6 },
   ];
 
   const layerOptions = [
@@ -37,9 +36,7 @@ const Tab1 = () => {
 
   const handleCheckboxChange = (layer) => {
     setSelectedLayers((prev) =>
-      prev.includes(layer)
-        ? prev.filter((l) => l !== layer)
-        : [...prev, layer]
+      prev.includes(layer) ? prev.filter((l) => l !== layer) : [...prev, layer]
     );
   };
 
@@ -55,7 +52,8 @@ const Tab1 = () => {
         date: "",
         time: "",
         opacity: 1,
-        sensor: "", // Added sensor field
+        sensor: "",
+        visible: true,
       },
     ]);
   };
@@ -65,20 +63,22 @@ const Tab1 = () => {
   };
 
   const handleSensorChange = (e, id) => {
-    const updatedSensor = parseInt(e.target.value, 10); // Get the selected sensor value
-    ChangeBand("http://127.0.0.1:8443/cog/stacked.tif", updatedSensor)
-    console.log("Sensor selected:", updatedSensor); // Log the selected sensor name
-    
+    const updatedSensor = e.target.value; // Get the selected sensor value
+    const sensorId = parseInt(updatedSensor, 10);
+    ChangeBand("http://127.0.0.1:8443/cog/stacked.tif", sensorId);
     const updatedLayers = [...layers];
     const layerIndex = updatedLayers.findIndex((layer) => layer.id === id);
-  
+
     if (layerIndex !== -1) {
-      updatedLayers[layerIndex] = { ...updatedLayers[layerIndex], sensor: updatedSensor }; // Update the sensor for the layer
+      updatedLayers[layerIndex] = {
+        ...updatedLayers[layerIndex],
+        sensor: updatedSensor,
+      }; // Update the sensor for the layer
     }
-  
+
     setLayers(updatedLayers); // Update the state with the new layers
   };
-  
+
   return (
     <div className={styles.Tab1}>
       <h3>Layer Management</h3>
@@ -137,13 +137,28 @@ const Tab1 = () => {
         {layers.map((layer) => (
           <div key={layer.id} className={styles.layerContainer}>
             <div className={styles.layer}>
+              <div className={styles.buttonContainer}>
+              <button
+                className={styles.toggleVisibilityButton}
+                onClick={() => {
+                  const updatedLayers = layers.map((l) =>
+                    l.id === layer.id ? { ...l, visible: !l.visible } : l
+                  );
+                  setLayers(updatedLayers);
+                }}
+              >
+                {layer.visible ? "Hide Layer" : "Show Layer"}
+              </button>
+
               <button
                 className={styles.deleteLayerButton}
                 onClick={() => handleDeleteLayer(layer.id)}
               >
                 Delete
               </button>
-              <label>Date:
+              </div>
+              <label>
+                Date:
                 <input
                   type="date"
                   className={styles.dateInput}
@@ -155,7 +170,8 @@ const Tab1 = () => {
                   }}
                 />
               </label>
-              <label>Time:
+              <label>
+                Time:
                 <input
                   type="datetime-local"
                   className={styles.timeInput}
@@ -170,13 +186,13 @@ const Tab1 = () => {
               <label>Sensor:</label>
               <select
                 className={styles.sensorSelect}
-                value={layer.sensor}
+                value={layer.id}
                 onChange={(e) => handleSensorChange(e, layer.id)}
               >
                 <option value="">Select Sensor</option>
                 {sensorOptions.map((sensor) => (
-                  <option key={sensor} value={sensor}>
-                    {sensor}
+                  <option key={sensor.id} value={sensor.id}>
+                    {sensor.name}
                   </option>
                 ))}
               </select>

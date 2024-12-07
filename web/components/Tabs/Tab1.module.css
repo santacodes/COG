@@ -59,7 +59,13 @@
   gap: 15px;
 }
 
-.deleteLayerButton {
+.buttonContainer{
+  display: flex;
+  justify-content: space-between;
+}
+
+.deleteLayerButton, .toggleVisibilityButton {
+  width: 45%;
   background-color: #dc3545;
   color: white;
   border: none;
@@ -71,7 +77,8 @@
   align-self: flex-start;
 }
 
-.deleteLayerButton:hover {
+.deleteLayerButton:hover,
+.toggleVisibilityButton:hover{
   background-color: #c82333;
   transform: scale(1.05); /* Hover effect */
 }
