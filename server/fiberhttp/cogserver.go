@@ -2,7 +2,6 @@ package fiberhttp
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 	"net/http"
 	"os"
@@ -47,16 +46,7 @@ func serveCOG(c *fiber.Ctx) error {
 	return c.SendFile(filePath)
 }
 
-func Run_COG() {
-	// Initialize Fiber app
-	app := fiber.New()
-
-	// Enable CORS middleware
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*", // Allow specific origins or replace "*" with your domain
-		AllowHeaders: "Origin, Content-Type, Accept, Range",
-	}))
-
+func Run_COG(app *fiber.App) {
 	// Serve static COG files from the directory
 	app.Get("/cog/:filename", serveCOG)
 
@@ -73,6 +63,5 @@ func Run_COG() {
 	}
 
 	// Start the Fiber server on port 8443 (HTTPS)
-	log.Println("Starting HTTPS server on port 8443...")
-	log.Fatal(app.Listen(":8443")) // Change this to app.ListenTLS(":8443", certFile, keyFile) for HTTPS
+	log.Println("Starting COG HTTPS server on port 8443...")
 }
