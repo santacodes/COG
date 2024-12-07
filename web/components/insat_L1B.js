@@ -71,6 +71,16 @@ export async function ChangeBand(url, band) {
     console.log(exampleLayer);
     map.removeLayer();
     map.addLayer(exampleLayer);
+    const geojsonSource = new VectorSource({
+      // You can replace this URL with the path to your GeoJSON file
+      url: "http://127.0.0.1:8443/cog/INDgeo.json",
+      format: new GeoJSON(),
+    });
+    const vectorLayer = new VectorLayer({
+      source: geojsonSource,
+    });
+
+    map.addLayer(vectorLayer);
     
   };
   await getInsatMap(url, band);
@@ -88,22 +98,15 @@ function L1BMapComponent() {
         zoom: 0,
       }),
     });
-    const url = "http://127.0.0.1:8443/cog/stacked.tif"; // Replace with your COG file URL
+    const url = "http://127.0.0.1:8443/cog/IMG_VIS.tif"; // Replace with your COG file URL
 
-    const osmLayer = new WebGLTileLayer({
-      source: new OSM(),
-    });
-    map.addLayer(osmLayer)
-    const geojsonSource = new VectorSource({
-      // You can replace this URL with the path to your GeoJSON file
-      url: "http://127.0.0.1:8443/cog/INDgeo.json",
-      format: new GeoJSON(),
-    });
-    const vectorLayer = new VectorLayer({
-      source: geojsonSource,
-    });
+    // const osmLayer = new WebGLTileLayer({
+    //   source: new OSM(),
+    // });
+    // map.addLayer(osmLayer)
+   
     // map.getLayers().insertAt(1,vectorLayer)
-    map.addLayer(vectorLayer)
+   
     // Create a vector layer to display the GeoJSON
   
     

@@ -4,6 +4,7 @@ from rasterio.transform import from_bounds
 from rasterio.crs import CRS
 import numpy as np
 from rasterio.enums import Resampling
+from rasterio.enums import ColorInterp
 import time
 
 
@@ -76,8 +77,8 @@ def create_stacked_COG(hdf5_file, output_cog_path):
                     band_max = dataset.max()
 
                     # Write min and max values as metadata
-                    dst.update_tags(band=key, min=band_min, max=band_max)
-                    
+                    dst.update_tags(bidx=i, min=band_min, max=band_max)
+                    # dst.colorinterp[i - 1] = ColorInterp.gray
                     print(f"Written subdataset '{key}' to band {i}, Min: {band_min}, Max: {band_max}")
 
     print(f"Stacked GeoTIFF (COG) file created successfully: {output_cog_path}")
@@ -85,6 +86,6 @@ def create_stacked_COG(hdf5_file, output_cog_path):
 
 if __name__ == "__main__":
     start_time = time.time()
-    create_stacked_COG("..SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5", "./stacked.tif")
+    create_stacked_COG("../SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5", "./stacked.tif")
     end_time = time.time()
     print(f"Runtime: {end_time - start_time:.2f} seconds")
