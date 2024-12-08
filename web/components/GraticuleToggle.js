@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Graticule from "ol/layer/Graticule";
 import Stroke from "ol/style/Stroke";
-import { Map } from "ol/Map";
 import { map } from "./insat_L1C";
 
 function GraticuleToggle() {

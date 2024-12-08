@@ -11,6 +11,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
 import { FullScreen, defaults as defaultControls } from "ol/control.js";
 import GraticuleToggle from "./GraticuleToggle";
+import LatLonPopover from "./LatLonPopover";
 
 export let map = new Map(null);
 export async function ChangeBand(url, band) {
@@ -79,20 +80,6 @@ export async function ChangeBand(url, band) {
   console.log("ends");
 }
 
-function AddGraticule() {
-  const grat = new Graticule({
-    // the style to use for the lines, optional.
-    strokeStyle: new Stroke({
-      color: "rgba(255,120,0,0.9)",
-      width: 2,
-      lineDash: [0.5, 4],
-    }),
-    showLabels: true,
-    wrapX: false,
-  });
-  map.addLayer(grat);
-}
-
 function L1CMapComponent() {
   useEffect(() => {
     map = new Map({
@@ -135,6 +122,7 @@ function L1CMapComponent() {
     <div>
       <GraticuleToggle map={map} />
       <div id="map" style={{ width: "100%", height: "1000px" }}></div>
+      <LatLonPopover map={map} />
     </div>
   );
 }
