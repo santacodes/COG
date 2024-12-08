@@ -55,7 +55,7 @@ herr_t find_3d_datasets_callback(hid_t group_id, const char *name, const H5L_inf
 // Main function
 int main() {
     
-    const char *file_name = "3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5";
+    const char *file_name = "../../../SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5";
     hid_t file_id;
     herr_t status;
     DatasetList datasets = {0};
