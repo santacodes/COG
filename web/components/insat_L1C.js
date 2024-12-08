@@ -5,10 +5,12 @@ import GeoTIFF from "ol/source/GeoTIFF";
 import "ol/ol.css";
 import { fromUrl } from "geotiff";
 import WebGLTileLayer from "ol/layer/WebGLTile";
-import { OSM } from "ol/source";
+import { OSM, TileWMS } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
+import WMTS from "ol/source";
+import WMTSTileGrid from "ol/tilegrid/WMTS";
 import {
   FullScreen,
   defaults as defaultControls,
@@ -21,6 +23,7 @@ import LatLonPopover from "./LatLonPopover";
 import { createStringXY } from "ol/coordinate";
 import MeasuringTool from "./MeasureTool";
 import DownloadMap from "./DownloadMap";
+import { TileGrid } from "ol/tilegrid";
 
 export let map = new Map(null);
 export async function ChangeBand(url, band) {
@@ -123,7 +126,7 @@ function L1CMapComponent() {
       view: new View({
         projection: "EPSG:4326",
         center: [77.25, 17.75],
-        zoom: 0,
+        zoom: 3,
       }),
     });
     const url = "http://127.0.0.1:8443/cog/stacked.tif"; // Replace with your COG file URL
@@ -136,15 +139,17 @@ function L1CMapComponent() {
     map.addLayer(osmLayer);
     const geojsonSource = new VectorSource({
       // You can replace this URL with the path to your GeoJSON file
-      url: "http://127.0.0.1:8443/cog/INDgeo.json",
+      url: "http://127.0.0.1:8443/cog/india-composite.geojson",
       format: new GeoJSON(),
     });
-    const vectorLayer = new VectorLayer({
+    const IndiaBoundary = new VectorLayer({
       source: geojsonSource,
     });
-    // map.getLayers().insertAt(1,vectorLayer)
+
+    //map.getLayers().insertAt(1,vectorLayer)
     // Create a vector layer to display the GeoJSON
-    ChangeBand(url, 1);
+    //ChangeBand(url, 1);
+    map.addLayer(IndiaBoundary)
     //AddGraticule();
     // map.addLayer(vectorLayer)
     // Cleanup function to destroy the map when the component unmounts
@@ -155,10 +160,11 @@ function L1CMapComponent() {
     <div>
       <GraticuleToggle map={map} />
       <div id="mouse-position"></div>
-      <div id="map" style={{ width: "100%", height: "1000px" }}>
-      </div>
+      <div id="map" style={{ width: "100%", height: "1000px" }}></div>
       <LatLonPopover map={map} />
-      <div><DownloadMap map={map}/></div>
+      <div>
+        <DownloadMap map={map} />
+      </div>
     </div>
   );
 }
