@@ -9,9 +9,10 @@ import { OSM } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-import { FullScreen, defaults as defaultControls } from "ol/control.js";
+import { FullScreen, defaults as defaultControls, MousePosition } from "ol/control.js";
 import GraticuleToggle from "./GraticuleToggle";
 import LatLonPopover from "./LatLonPopover";
+import { createStringXY } from "ol/coordinate";
 
 export let map = new Map(null);
 export async function ChangeBand(url, band) {
@@ -82,9 +83,18 @@ export async function ChangeBand(url, band) {
 
 function L1CMapComponent() {
   useEffect(() => {
+    const mousePositionControl = new MousePosition({
+      coordinateFormat: createStringXY(4),
+      projection: 'EPSG:4326',
+      // comment the following two lines to have the mouse position
+      // be placed within the map.
+      className: 'custom-mouse-position',
+      target: document.getElementById('mouse-position'),
+    });
+
     map = new Map({
+      controls: defaultControls().extend([mousePositionControl, new FullScreen]),
       target: "map",
-      controls: defaultControls().extend([new FullScreen()]),
       layers: [],
       view: new View({
         projection: "EPSG:4326",
@@ -121,7 +131,9 @@ function L1CMapComponent() {
   return (
     <div>
       <GraticuleToggle map={map} />
-      <div id="map" style={{ width: "100%", height: "1000px" }}></div>
+        <div id="mouse-position"></div>
+      <div id="map" style={{ width: "100%", height: "1000px" }}>
+      </div>
       <LatLonPopover map={map} />
     </div>
   );
