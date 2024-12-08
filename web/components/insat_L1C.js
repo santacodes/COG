@@ -9,10 +9,18 @@ import { OSM } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-import { FullScreen, defaults as defaultControls, MousePosition } from "ol/control.js";
+import {
+  FullScreen,
+  defaults as defaultControls,
+  MousePosition,
+  OverviewMap,
+  overviewMapControl,
+} from "ol/control.js";
 import GraticuleToggle from "./GraticuleToggle";
 import LatLonPopover from "./LatLonPopover";
 import { createStringXY } from "ol/coordinate";
+import MeasuringTool from "./MeasureTool";
+import DownloadMap from "./DownloadMap";
 
 export let map = new Map(null);
 export async function ChangeBand(url, band) {
@@ -85,15 +93,31 @@ function L1CMapComponent() {
   useEffect(() => {
     const mousePositionControl = new MousePosition({
       coordinateFormat: createStringXY(4),
-      projection: 'EPSG:4326',
+      projection: "EPSG:4326",
       // comment the following two lines to have the mouse position
       // be placed within the map.
-      className: 'custom-mouse-position',
-      target: document.getElementById('mouse-position'),
+      className: "custom-mouse-position",
+      target: document.getElementById("mouse-position"),
+    });
+
+    const overviewMapControl = new OverviewMap({
+      className: "ol-overviewmap ol-custom-overviewmap",
+      layers: [
+        new TileLayer({
+          source: new OSM(), // Use custom OSM tile source
+        }),
+      ],
+      collapseLabel: "\u00BB",
+      label: "\u00AB",
+      collapsed: false,
     });
 
     map = new Map({
-      controls: defaultControls().extend([mousePositionControl, new FullScreen]),
+      controls: defaultControls().extend([
+        mousePositionControl,
+        new FullScreen(),
+        overviewMapControl,
+      ]),
       target: "map",
       layers: [],
       view: new View({
@@ -123,7 +147,6 @@ function L1CMapComponent() {
     ChangeBand(url, 1);
     //AddGraticule();
     // map.addLayer(vectorLayer)
-
     // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
   }, []); // Empty dependency array ensures this effect runs once on mount
@@ -131,10 +154,11 @@ function L1CMapComponent() {
   return (
     <div>
       <GraticuleToggle map={map} />
-        <div id="mouse-position"></div>
+      <div id="mouse-position"></div>
       <div id="map" style={{ width: "100%", height: "1000px" }}>
       </div>
       <LatLonPopover map={map} />
+      <div><DownloadMap map={map}/></div>
     </div>
   );
 }
