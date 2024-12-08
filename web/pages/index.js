@@ -59,6 +59,8 @@ const MapPage = () => {
       )}
       <div>
         <h1>Weather Chart</h1>
+        <h1 className="text-3xl font-bold underline">
+    </h1>
         <WeatherChart lat={lat} lon={lon} />
       </div>
     </div>

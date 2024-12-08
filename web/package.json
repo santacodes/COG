@@ -26,6 +26,8 @@
         "style-loader": "^4.0.0"
     },
     "devDependencies": {
-        "tailwindcss": "^3.4.15"
+        "autoprefixer": "^10.4.20",
+        "postcss": "^8.4.49",
+        "tailwindcss": "^3.4.16"
     }
 }
