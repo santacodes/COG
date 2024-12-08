@@ -9,7 +9,10 @@ import { OSM } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-let map = new Map(null);
+import { FullScreen, defaults as defaultControls } from "ol/control.js";
+import GraticuleToggle from "./GraticuleToggle";
+
+export let map = new Map(null);
 export async function ChangeBand(url, band) {
   // Function to load and process the GeoTIFF COG file
   const loadinsatGeoTIFF = async (url, band) => {
@@ -43,7 +46,7 @@ export async function ChangeBand(url, band) {
       sources: [
         {
           url: url,
-          bands: [1,2,3,4,5,6], // Use band 1 (or any band you want)
+          bands: [1, 2, 3, 4, 5, 6], // Use band 1 (or any band you want)
           max: MinMax.max,
           min: MinMax.min,
         },
@@ -71,31 +74,45 @@ export async function ChangeBand(url, band) {
     console.log(exampleLayer);
     map.removeLayer();
     map.addLayer(exampleLayer);
-    
   };
   await getInsatMap(url, band);
-  console.log('ends')
+  console.log("ends");
+}
+
+function AddGraticule() {
+  const grat = new Graticule({
+    // the style to use for the lines, optional.
+    strokeStyle: new Stroke({
+      color: "rgba(255,120,0,0.9)",
+      width: 2,
+      lineDash: [0.5, 4],
+    }),
+    showLabels: true,
+    wrapX: false,
+  });
+  map.addLayer(grat);
 }
 
 function L1CMapComponent() {
   useEffect(() => {
     map = new Map({
       target: "map",
+      controls: defaultControls().extend([new FullScreen()]),
       layers: [],
       view: new View({
         projection: "EPSG:4326",
-        center: [77.25,17.75],
+        center: [77.25, 17.75],
         zoom: 0,
       }),
     });
     const url = "http://127.0.0.1:8443/cog/stacked.tif"; // Replace with your COG file URL
-    const baseurl = process.env.NEXT_PUBLIC_BASE_URL
-    console.log("this is the base url" + baseurl)
+    const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
+    console.log("this is the base url" + baseurl);
 
     const osmLayer = new WebGLTileLayer({
       source: new OSM(),
     });
-    map.addLayer(osmLayer)
+    map.addLayer(osmLayer);
     const geojsonSource = new VectorSource({
       // You can replace this URL with the path to your GeoJSON file
       url: "http://127.0.0.1:8443/cog/INDgeo.json",
@@ -105,21 +122,21 @@ function L1CMapComponent() {
       source: geojsonSource,
     });
     // map.getLayers().insertAt(1,vectorLayer)
-    
     // Create a vector layer to display the GeoJSON
-  
-    
     ChangeBand(url, 1);
+    //AddGraticule();
     // map.addLayer(vectorLayer)
-    
 
-    
-    // map.addLayer(dummy)
     // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
   }, []); // Empty dependency array ensures this effect runs once on mount
 
-  return <div id="map" style={{ width: "100%", height: "1000px" }}></div>;
+  return (
+    <div>
+      <GraticuleToggle map={map} />
+      <div id="map" style={{ width: "100%", height: "1000px" }}></div>
+    </div>
+  );
 }
 
 export default L1CMapComponent;
