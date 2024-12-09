@@ -10,6 +10,33 @@ const SidePane = dynamic(() => import("../components/sidePane/SidePane"), {
   ssr: false,
 });
 
+const weatherData = [
+  {
+    date: "Fri, 22 Jan",
+    humidity: "12%",
+    temperature: "18° / 32°",
+    rainIcon: true,
+  },
+  {
+    date: "Sat, 23 Jan",
+    humidity: "0%",
+    temperature: "22° / 34°",
+    rainIcon: false,
+  },
+  {
+    date: "Sun, 24 Jan",
+    humidity: "20%",
+    temperature: "21° / 32°",
+    rainIcon: true,
+  },
+  {
+    date: "Mon, 25 Jan",
+    humidity: "50%",
+    temperature: "20° / 30°",
+    rainIcon: true,
+  },
+];
+
 const MapPage = () => {
   // return <LeafletMap />;
 
@@ -19,8 +46,9 @@ const MapPage = () => {
     setIsSidePaneOpen(!isSidePaneOpen);
   };
 
-  const lat = 21.166483858206583; 
-  const lon = 79.40917968750001; 
+  const lat = 21.166483858206583;
+  const lon = 79.40917968750001;
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       <LeafletMap />
@@ -60,7 +88,7 @@ const MapPage = () => {
       <div>
         <h1>Weather Chart</h1>
         <h1 className="text-3xl font-bold underline">
-    </h1>
+        </h1>
         <WeatherChart lat={lat} lon={lon} />
       </div>
     </div>
