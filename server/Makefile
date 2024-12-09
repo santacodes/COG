@@ -1,10 +1,10 @@
 # Variables
 CC = gcc
 GO = go
-CFLAGS = -fPIC -I./gdal/c_bindings -I/usr/include/gdal
+CFLAGS = -fPIC -I./gdal/c_bindings -I/usr/include/gdal -mavx
 LDFLAGS = -L./gdal/c_bindings/build -linsat_bindings -L/usr/lib -lgdal 
 BUILD_DIR = gdal/c_bindings/build
-C_SRCS = gdal/c_bindings/insat_metadata.c gdal/c_bindings/merge_tiff.c gdal/c_bindings/toGeoTiff.c
+C_SRCS = gdal/c_bindings/minmax.c gdal/c_bindings/geo_attributes.c gdal/c_bindings/h5_to_COG.c
 C_OBJS = $(patsubst gdal/c_bindings/%.c,$(BUILD_DIR)/%.o,$(C_SRCS))
 C_LIB = $(BUILD_DIR)/libinsat_bindings.so
 GO_OUTPUT = cogserver

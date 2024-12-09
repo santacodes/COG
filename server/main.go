@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/santacodes/COG/fiberhttp"
+	"github.com/santacodes/COG/gdal"
 	"log"
 	"os"
 )
@@ -32,7 +33,7 @@ func main() {
 	if _, err := os.Stat(keyFile); os.IsNotExist(err) {
 		log.Fatalf("Key file not found: %s", keyFile)
 	}
-
+	//COG.PipelineMain("3RIMG_04SEP2024_1545_L1C_ASIA_MER_V01R00.h5", "outputs")
 	// Start the Fiber server on port 8443 (HTTPS)
 	log.Println("Loaded and starting HTTPS server on port 8443 for COG and weather proxy...")
 	log.Fatal(app.Listen(":8443")) // Change this to app.ListenTLS(":8443", certFile, keyFile) for HTTPS
