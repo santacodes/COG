@@ -1,18 +1,25 @@
 import React, { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
-import { noSSR } from "next/dynamic";
 
 function renderChart(label, data, times, chartId) {
-  const ctx = document.getElementById(chartId).getContext("2d");
+  const canvas = document.getElementById(chartId);
+  const ctx = canvas.getContext("2d");
+
+  // Check if the canvas size exceeds max size, and adjust it if necessary
+  const maxWidth = 800;
+  const maxHeight = 400;
+  canvas.width = Math.min(canvas.width, maxWidth);
+  canvas.height = Math.min(canvas.height, maxHeight);
+
   new Chart(ctx, {
-    type: label === "Precipitation" ? "bar" : "line", // Precipitation uses bar chart, others use line chart
+    type: label === "Precipitation" ? "bar" : "line",
     data: {
       labels: times,
       datasets: [
         {
           label: label,
           data: data,
-          borderColor: "rgba(75, 192, 192, 1)", // Dynamic color can be set based on label
+          borderColor: "rgba(75, 192, 192, 1)",
           backgroundColor:
             label === "Precipitation"
               ? "rgba(255, 99, 132, 0.2)"
@@ -30,14 +37,11 @@ function renderChart(label, data, times, chartId) {
       },
     },
   });
-
-  // Render each chart separately
 }
 
 let chart = null;
 function WeatherChart({ lat, lon }) {
   const chartRef = useRef(null);
-  //const ctx = chartRef.current.getContext("2d");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -83,23 +87,37 @@ function WeatherChart({ lat, lon }) {
             "precipChart"
           );
         }
-        await renderWeatherCharts(apiData);
       } catch (error) {
         console.error("Error fetching weather data:", error);
       }
     };
     fetchData();
   }, [lat, lon]);
-  
+
   return (
-    <div style={{ width: "80%", margin: "auto" }}>
-      <canvas ref={chartRef}></canvas>
-      <canvas id="tempChart" width="800" height="400"></canvas>
-      <canvas id="humidityChart" width="800" height="400"></canvas>
-      <canvas id="pressureChart" width="800" height="400"></canvas>
-      <canvas id="windChart" width="800" height="400"></canvas>
-      <canvas id="precipChart" width="800" height="400"></canvas>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl mx-auto justify-items-center">
+      <canvas
+        id="humidityChart"
+        className="w-full h-auto max-w-full max-h-[400px]"
+      ></canvas>
+      <canvas
+        id="pressureChart"
+        className="w-full h-auto max-w-full max-h-[400px]"
+      ></canvas>
+      <canvas
+        id="tempChart"
+        className="w-full h-auto max-w-full max-h-[400px]"
+      ></canvas>
+      <canvas
+        id="windChart"
+        className="w-full h-auto max-w-full max-h-[400px]"
+      ></canvas>
+      <canvas
+        id="precipChart"
+        className="w-full h-auto max-w-full max-h-[400px]"
+      ></canvas>
     </div>
+
   );
 }
 

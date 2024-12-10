@@ -96,3 +96,5 @@ const MapPage = () => {
 };
 
 export default MapPage;
+
+{/* <div className="flex flex-col items-center justify-center w-full min-h-screen text-gray-700 p-10 bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200"> */}

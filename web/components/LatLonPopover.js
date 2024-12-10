@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { toLonLat } from "ol/proj.js";
+import WeatherChart from "./wrf";
 
 function LatLonLogger({ map }) {
     const [weatherData, setWeatherData] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
-    const [confpopup, setConfPopup] = useState(false); // New state for conditional popup
+    const [confpopup, setConfPopup] = useState(false);
+    const [activeTab, setActiveTab] = useState("chart"); // New state for tabs
 
     const fetchWeatherData = async (lat, lon) => {
         try {
@@ -16,8 +18,8 @@ function LatLonLogger({ map }) {
             }
             const data = await response.json();
             setWeatherData(data);
-            setShowPopup(true); // Show popup when data is fetched
-            setConfPopup(true); // Enable confirmation popup
+            setShowPopup(true);
+            setConfPopup(true);
         } catch (error) {
             console.error("Error fetching weather data:", error);
         }
@@ -57,55 +59,29 @@ function LatLonLogger({ map }) {
         const groupedData = groupDataByDate(weatherData.data);
 
         return Object.keys(groupedData).map((date) => (
-            <div key={date} className="flex flex-col bg-white p-10 w-full rounded-xl ring-8 ring-white ring-opacity-40">
-                <div className="mb-10 w-full">
-                    <h3 className="text-center text-lg font-semibold underline mb-4">{date}</h3>
-                    <div className="flex flex-col items-center justify-center w-full text-gray-700">
-                        <div className="flex flex-col items-center justify-center space-y-6 w-full max-w-screen-sm bg-white p-10 rounded-xl ring-8 ring-white ring-opacity-40">
-                            <div className="flex justify-between items-center space-x-20 ">
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">Time</h2>
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">T2°C</h2>
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">PSFC</h2>
-                                    Pa
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">RH2%</h2>
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">Rainmm</h2>
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">WS10 m/s</h2>
-                                </div>
-                                <div className="flex-1 text-center">
-                                    <h2 className="font-bold text-lg">WD10°</h2>
-                                </div>
+            <div key={date} className="flex flex-col bg-white p-10 w-full rounded-xl ring-8 ring-white ring-opacity-40 my-20">
+                <h3 className="text-center text-lg font-semibold underline mb-4">{date}</h3>
+                <div className="flex flex-col items-center justify-center w-full text-gray-700">
+                    <div className="inline-flex flex-col items-center justify-center space-y-6 bg-white p-10 rounded-xl ring-8 ring-white ring-opacity-40">                        <div className="flex justify-between items-center space-x-20">
+                        <div className="flex-1 text-center font-bold">Time</div>
+                        <div className="flex-1 text-center font-bold">T2°C</div>
+                        <div className="flex-1 text-center font-bold">PSFC</div>
+                        <div className="flex-1 text-center font-bold">RH2%</div>
+                        <div className="flex-1 text-center font-bold">Rain (mm)</div>
+                        <div className="flex-1 text-center font-bold">WS10 (m/s)</div>
+                        <div className="flex-1 text-center font-bold">WD10°</div>
+                    </div>
+                        {groupedData[date].map((entry, idx) => (
+                            <div key={idx} className="flex justify-between items-center space-x-20">
+                                <div className="text-center">{entry.time}</div>
+                                <div className="text-center">{entry.t2}°C</div>
+                                <div className="text-center">{entry.psfc}Pa</div>
+                                <div className="text-center">{entry.rh2}%</div>
+                                <div className="text-center">{(+entry.rainc + +entry.rainnc).toFixed(2)}mm</div>
+                                <div className="text-center">{entry.ws10}m/s</div>
+                                <div className="text-center">{entry.wd10}°</div>
                             </div>
-
-                            {groupedData[date].map((entry, idx) => (
-                                <div key={idx} className="flex justify-between items-center space-x-20 ">
-                                    <div className=" text-center">{entry.time}</div>
-                                    <div className=" text-center">{entry.t2}°C</div>
-                                    <div className=" text-center">{entry.psfc}Pa</div>
-                                    <div className=" text-center">{entry.rh2}%</div>
-                                    <div className=" text-center">
-                                        <svg className="w-6 h-6 fill-current ml-1" viewBox="0 0 16 20" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                                            <g transform="matrix(1,0,0,1,-4,-2)">
-                                                <path d="M17.66,8L12.71,3.06C12.32,2.67 11.69,2.67 11.3,3.06L6.34,8C4.78,9.56 4,11.64 4,13.64C4,15.64 4.78,17.75 6.34,19.31C7.9,20.87 9.95,21.66 12,21.66C14.05,21.66 16.1,20.87 17.66,19.31C19.22,17.75 20,15.64 20,13.64C20,11.64 19.22,9.56 17.66,8ZM6,14C6.01,12 6.62,10.73 7.76,9.6L12,5.27L16.24,9.65C17.38,10.77 17.99,12 18,14C18.016,17.296 14.96,19.809 12,19.74C9.069,19.672 5.982,17.655 6,14Z" style={{ fillRule: "nonzero" }} />
-                                            </g>
-                                        </svg>
-                                    </div>
-                                        {(+entry.rainc + +entry.rainnc).toFixed(2)}mm
-                                    <div className=" text-center">{entry.ws10}m/s</div>
-                                    <div className="text-center">{entry.wd10}°</div>
-                                </div>
-                            ))}
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -114,13 +90,13 @@ function LatLonLogger({ map }) {
 
     const handleOutsideClick = (e) => {
         if (e.target.id === "popup-overlay") {
-            setConfPopup(false); // Disable confirmation popup on outside click
-            setShowPopup(false); // Close popup
+            setConfPopup(false);
+            setShowPopup(false);
         }
     };
 
     const handleInsideClick = (e) => {
-        e.stopPropagation(); // Prevent event propagation to the overlay
+        e.stopPropagation();
     };
 
     return (
@@ -156,13 +132,13 @@ function LatLonLogger({ map }) {
                             overflowY: "auto",
                             maxHeight: "80%",
                         }}
-                        onClick={handleInsideClick} // Prevent popup from closing on inside click
+                        onClick={handleInsideClick}
                     >
                         <div className="flex flex-col items-center justify-center w-full min-h-screen text-gray-700 p-10 bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200">
                             <button
                                 onClick={() => {
-                                    setConfPopup(false); // Close the confirmation popup
-                                    setShowPopup(false); // Close the main popup
+                                    setConfPopup(false);
+                                    setShowPopup(false);
                                 }}
                                 style={{
                                     position: "absolute",
@@ -178,7 +154,33 @@ function LatLonLogger({ map }) {
                             >
                                 Close
                             </button>
-                            {renderWeatherData()}
+                            <div className="tabs">
+                                <button
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${activeTab === "chart"
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 mx-5"
+                                        }`}
+                                    onClick={() => setActiveTab("chart")}
+                                >
+                                    Chart
+                                </button>
+                                <button
+                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${activeTab === "table"
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 mx-5"
+                                        }`}
+                                    onClick={() => setActiveTab("table")}
+                                >
+                                    Table
+                                </button>
+
+                            </div>
+                            <div className="tab-content">
+                                {activeTab === "chart" && weatherData && (
+                                    <WeatherChart lat={weatherData.lat} lon={weatherData.lon} />
+                                )}
+                                {activeTab === "table" && renderWeatherData()}
+                            </div>
                         </div>
                     </div>
                 </div>
