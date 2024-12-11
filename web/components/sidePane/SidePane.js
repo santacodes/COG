@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 // Dynamic imports for tabs
 const Tab1 = dynamic(() => import("../Tabs/Tab1"));
 
-
 const SidePane = () => {
   const [activeTab, setActiveTab] = useState("tab1");
 
@@ -21,11 +20,21 @@ const SidePane = () => {
           }`}
           onClick={() => setActiveTab("tab1")}
         >
-          <img
-            src="/images/icon1.jpeg"
-            alt="Layers"
+          {/* New Map Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
             className="w-6 h-6"
-          />
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8 21l-5-2.5V5l5 2.5M8 21l8-4M8 7.5l8-4M16 3l5 2.5v13l-5 2.5M8 7.5v13"
+            />
+          </svg>
         </button>
         <button
           className={`flex items-center justify-center w-12 h-12 rounded-lg transition ${
@@ -35,11 +44,21 @@ const SidePane = () => {
           }`}
           onClick={() => setActiveTab("tab3")}
         >
-          <img
-            src="/images/icon2.jpeg"
-            alt="Cube"
+          {/* Tech Stack Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
             className="w-6 h-6"
-          />
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
         </button>
       </nav>
 
@@ -53,3 +72,7 @@ const SidePane = () => {
 };
 
 export default SidePane;
+
+
+
+
