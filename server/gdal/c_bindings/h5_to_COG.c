@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-char *creation_options[] = {"TILED=YES", "COMPRESS=LZW", NULL};
 
+char *creation_options[] = {"TILED=YES", "COMPRESS=LZW", NULL};
 static const char *DATASET_NAMES[] = {"IMG_MIR",  "IMG_SWIR", "IMG_TIR1",
                                       "IMG_TIR2", "IMG_VIS",  "IMG_WV"};
 static const int DATASET_COUNT = 6; // Number of datasets
@@ -55,17 +55,18 @@ int process_dataset(hid_t file_id, const char *dataset_name,
     return -1;
   }
 
+  // Set GeoTransform and Projection
   GDALSetGeoTransform(hOutput, geotransform);
   GDALSetProjection(hOutput, "EPSG:4326");
 
-  // Write data to GeoTIFF
+  // Declare hBand to get the raster band from the output dataset
   GDALRasterBandH hBand = GDALGetRasterBand(hOutput, 1);
+
+  // Write the data to the raster band
   if (GDALRasterIO(hBand, GF_Write, 0, 0, width, height, data, width, height,
                    GDT_Float32, 0, 0) != CE_None) {
     fprintf(stderr, "Failed to write dataset: %s to GeoTIFF\n", dataset_name);
   }
-
-  GDALSetDescription(hBand, dataset_name);
 
   // Build overviews for better performance
   int overviewLevels[] = {2, 4};
@@ -74,17 +75,21 @@ int process_dataset(hid_t file_id, const char *dataset_name,
     fprintf(stderr, "Failed to build overviews for dataset: %s\n",
             dataset_name);
   }
+
+  // Compute min/max values and store in metadata
   float minmax[2];
   get_min_max_2d(data, height, width, &minmax[0], &minmax[1]);
   printf("Dataset: %s, Min: %.2f, Max: %.2f\n", dataset_name, minmax[0],
          minmax[1]);
-  printf("Min: %.2f, Max: %.2f\n", minmax[0], minmax[1]);
 
   char min_str[10], max_str[10];
   snprintf(min_str, sizeof(min_str), "%.6f", minmax[0]);
   snprintf(max_str, sizeof(max_str), "%.6f", minmax[1]);
   GDALSetMetadataItem(hBand, "min", min_str, NULL);
   GDALSetMetadataItem(hBand, "max", max_str, NULL);
+
+  // Optionally, set description for the band
+  GDALSetDescription(hBand, dataset_name);
 
   // Clean up
   GDALClose(hOutput);
@@ -96,6 +101,7 @@ int process_dataset(hid_t file_id, const char *dataset_name,
 
 int process_hdf5_to_cog(const char *file_name, const char *output_dir,
                         const char *dataset_names[], int dataset_count) {
+  // Open the HDF5 file
   hid_t file_id = H5Fopen(file_name, H5F_ACC_RDONLY, H5P_DEFAULT);
   if (file_id < 0) {
     fprintf(stderr, "Failed to open HDF5 file: %s\n", file_name);
@@ -134,6 +140,7 @@ int process_hdf5_to_cog(const char *file_name, const char *output_dir,
       -(attrs.upper_latitude - attrs.lower_latitude) / height};
 
   // Process each dataset
+#pragma openmp for
   for (int i = 0; i < dataset_count; i++) {
     char output_file[256];
     snprintf(output_file, sizeof(output_file), "%s/%s.tif", output_dir,
@@ -152,10 +159,6 @@ int process_hdf5_to_cog(const char *file_name, const char *output_dir,
 }
 
 int PipelineMain(char *file_name, char *output_dir) {
-  // const char *file_name =
-  //    "../../../SIH2024/3RIMG_04SEP2024_1015_L1C_ASIA_MER_V01R00.h5";
-  // const char *output_dir = "./output";
-  // Process HDF5 file and create GeoTIFFs
   if (process_hdf5_to_cog(file_name, output_dir, DATASET_NAMES,
                           DATASET_COUNT) != 0) {
     fprintf(stderr, "Failed to process file: %s\n", file_name);

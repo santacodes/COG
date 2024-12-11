@@ -8,6 +8,8 @@ import (
 	"github.com/santacodes/COG/gdal"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -33,7 +35,37 @@ func main() {
 	if _, err := os.Stat(keyFile); os.IsNotExist(err) {
 		log.Fatalf("Key file not found: %s", keyFile)
 	}
-	//COG.PipelineMain("3RIMG_04SEP2024_1545_L1C_ASIA_MER_V01R00.h5", "outputs")
+	// Input and output directories
+	inputDir := "../pipeline/SIH2024/" // Directory containing COG files
+	outputDir := "stacked_new.tif"     // Directory to store processed files
+
+	// Ensure output directory exists
+	//if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+	//	if err := os.Mkdir(outputDir, os.ModePerm); err != nil {
+	//		log.Fatalf("Failed to create output directory: %s", outputDir)
+	//	}
+	//}
+
+	// Iterate over files in the input directory
+	err := filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// Check if the file contains "L1C" in its name and has a .h5 extension
+		if !info.IsDir() && strings.Contains(info.Name(), "L1C") && strings.HasSuffix(info.Name(), ".h5") {
+			log.Printf("Processing dataset: %s -> %s", info.Name(), outputDir)
+			COG.PipelineMainL1C(path, outputDir)
+		}
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalf("Error while walking through input directory: %v", err)
+	}
+
+	log.Println("Finished processing all datasets.")
+
+	//COG.PipelineMain("./3RIMG_04SEP2024_1545_L1C_ASIA_MER_V01R00.h5", "outputs")
 	// Start the Fiber server on port 8443 (HTTPS)
 	log.Println("Loaded and starting HTTPS server on port 8443 for COG and weather proxy...")
 	log.Fatal(app.Listen(":8443")) // Change this to app.ListenTLS(":8443", certFile, keyFile) for HTTPS

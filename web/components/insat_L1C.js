@@ -19,6 +19,7 @@ import {
 } from "ol/control.js";
 import { createStringXY } from "ol/coordinate";
 import DownloadMap from "./DownloadMap";
+import PartialDown from "./PartialDown";
 
 export let map = new Map(null);
 
@@ -57,13 +58,7 @@ export async function ChangeBand(url, band) {
     const insatMap = new WebGLTileLayer({
       source: source,
       style: {
-        color: [
-          "array",
-          ["band", band],
-          ["band", band],
-          ["band", band],
-          1,
-        ],
+        color: ["array", ["band", band], ["band", band], ["band", band], 1],
       },
     });
     return insatMap;
@@ -161,14 +156,26 @@ function L1CMapComponent() {
       source: geojsonSource,
     });
 
+    //map.getLayers().insertAt(1,vectorLayer)
+    // Create a vector layer to display the GeoJSON
     map.addLayer(IndiaBoundary);
-
+    //AddGraticule();
+    // map.addLayer(vectorLayer)
+    // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
-  }, []);
+  }, []);[map, osmLayer]
 
   return (
     <div>
+      <div>
+        <div id="map" style={{ width: "100%", height: "400px" }}></div>
+      </div>
       <div id="map" className="relative w-full h-screen"></div>
+  <div>
+    <h1>Map with Bounding Box Drawer</h1>
+    <PartialDown map={map, osmLayer} />
+    <div id="map" style={{ width: '100%', height: '400px' }}></div>
+  </div>
       <div>
         {/* Toggle Button */}
         <button
@@ -178,27 +185,36 @@ function L1CMapComponent() {
           } z-[1100] bg-gray-800 text-white border-none cursor-pointer shadow-md`}
         >
           {isToolbarToggled ? (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-5 h-5"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-      </svg>
-    ) : (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-5 h-5"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5L15.75 12l-7.5 7.5" />
-      </svg>)}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 19.5L8.25 12l7.5-7.5"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 4.5L15.75 12l-7.5 7.5"
+              />
+            </svg>
+          )}
         </button>
 
         {/* Toolbar */}
@@ -212,8 +228,16 @@ function L1CMapComponent() {
             onClick={toggleGraticule}
             className="text-sm bg-gray-800 text-white px-0 mt-8 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}</button>
-            <button title="Download Map" onClick={() => DownloadMap(map)} className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2">Download Map </button></div>
+            {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}
+          </button>
+          <button
+            title="Download Map"
+            onClick={() => DownloadMap(map)}
+            className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2"
+          >
+            Download Map{" "}
+          </button>
+        </div>
       </div>
       <div
         id="mouse-position"

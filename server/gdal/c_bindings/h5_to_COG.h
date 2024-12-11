@@ -1,6 +1,7 @@
 #ifndef HDF5_TO_COG_H
 #define HDF5_TO_COG_H
 
+#include <cuda_runtime.h>
 #include <gdal.h>
 #include <hdf5.h>
 
@@ -19,7 +20,6 @@ typedef struct {
  * @param file_id HDF5 file identifier.
  * @return GeoAttributes containing the geographic metadata.
  */
-GeoAttributes fetch_geo_attributes(hid_t file_id);
 
 /**
  * Process a single dataset from an HDF5 file and create a COG (Cloud Optimized
@@ -48,6 +48,15 @@ int process_dataset(hid_t file_id, const char *dataset_name,
 int process_hdf5_to_cog(const char *file_name, const char *output_dir,
                         const char *dataset_names[], int dataset_count);
 
+/**
+ * Main pipeline function for processing HDF5 data to COG.
+ * @param file_name Path to the HDF5 file.
+ * @param output_dir Directory where the output COGs will be saved.
+ * @return 0 on success, non-zero on failure.
+ */
+extern "C" {
 int PipelineMain(char *file_name, char *output_dir);
+}
 
 #endif // HDF5_TO_COG_H
+
