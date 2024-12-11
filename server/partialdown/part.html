@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Raster</title>
+  </head>
+  <body>
+    <h1>Download Partial Raster</h1>
+    <button id="download-btn">Download Raster</button>
+
+    <script>
+      // Define the bounding box data
+      const bbox = [
+        73.31195675133868, 20.105460971593857, 81.89125376059603,
+        27.277333825826645,
+      ];
+
+      document.getElementById("download-btn").addEventListener("click", () => {
+        // Send POST request with JSON data
+        fetch("http://127.0.0.1:8553/api/download-raster", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bbox: bbox,
+          }),
+        })
+          .then((response) => response.blob()) // Convert response to a Blob if it's a file
+          .then((blob) => {
+            // Create a temporary link to download the file
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "partial_raster.tif";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+          })
+          .catch((error) => console.error("Error:", error));
+      });
+    </script>
+  </body>
+</html>

@@ -26,7 +26,7 @@ async def download_raster(data: BoundingBox):
 
             # Read the data in the specified window
             data = dataset.read(1, window=window)
-
+            print(dataset.crs)
             # Create an in-memory file to hold the new raster data (TIFF format)
             memfile = io.BytesIO()
             with rasterio.open(
@@ -49,7 +49,7 @@ async def download_raster(data: BoundingBox):
                 memfile,
                 media_type="image/tiff",
                 headers={
-                    "Content-Disposition": "attachment; filename=partial_raster.tif"
+                    "Content-Disposition": "attachment; filename=stacked.tif"
                 },
             )
 

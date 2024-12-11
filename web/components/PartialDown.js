@@ -1,20 +1,21 @@
 import React, { useEffect } from 'react';
-import Draw from 'ol/interaction'
-import createBox from 'ol/interaction/Draw';
+import { Draw } from 'ol/interaction.js';
+import { createBox } from 'ol/interaction/Draw';
 import { Vector as VectorSource } from 'ol/source';
-import { create } from 'ol/transform';
+import { osmdup } from './insat_L1C';
 
 const PartialDown = ({ map, layer }) => {
   useEffect(() => {
     if (!map) return;
 
     let drawInteraction;
+
     const addInteraction = () => {
       // Create a new Draw interaction for drawing a box
       drawInteraction = new Draw({
-        source: layer.getSource(),
+        source: osmdup.getSource(),
         type: 'Circle', // OpenLayers uses 'Circle' for box geometry with createBox()
-        geometryFunction: createBox,
+        geometryFunction: createBox(),
       });
 
       // Handle the end of the drawing event
@@ -23,7 +24,7 @@ const PartialDown = ({ map, layer }) => {
         console.log('Bounding Box Coordinates:', extent);
 
         // Send the bounding box to the FastAPI endpoint
-        fetch('/api/download-raster', {
+        fetch('http://127.0.0.1:8443/partial/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

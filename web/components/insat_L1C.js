@@ -22,6 +22,7 @@ import DownloadMap from "./DownloadMap";
 import PartialDown from "./PartialDown";
 
 export let map = new Map(null);
+export let osmdup = new WebGLTileLayer(null) 
 
 export async function ChangeBand(url, band) {
   const loadinsatGeoTIFF = async (url, band) => {
@@ -146,7 +147,7 @@ function L1CMapComponent() {
       source: new OSM(),
     });
     map.addLayer(osmLayer);
-
+    osmdup = osmLayer
     const geojsonSource = new VectorSource({
       url: "http://192.168.189.113:8443/cog/india-composite.geojson",
       format: new GeoJSON(),
@@ -163,7 +164,7 @@ function L1CMapComponent() {
     // map.addLayer(vectorLayer)
     // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
-  }, []);[map, osmLayer]
+  }, []);
 
   return (
     <div>
@@ -173,7 +174,7 @@ function L1CMapComponent() {
       <div id="map" className="relative w-full h-screen"></div>
   <div>
     <h1>Map with Bounding Box Drawer</h1>
-    <PartialDown map={map, osmLayer} />
+    <PartialDown map={map} />
     <div id="map" style={{ width: '100%', height: '400px' }}></div>
   </div>
       <div>

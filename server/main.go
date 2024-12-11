@@ -24,6 +24,7 @@ func main() {
 	}))
 	fiberhttp.Run_COG(app)
 	fiberhttp.WeatherServer(app)
+	fiberhttp.StartPartial(app)
 	// Start the server with HTTPS (replace with your actual cert and key files)
 	certFile := "./server.crt"
 	keyFile := "./server.key"
