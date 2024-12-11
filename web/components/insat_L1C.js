@@ -173,11 +173,32 @@ function L1CMapComponent() {
         {/* Toggle Button */}
         <button
           onClick={toggleToolbar}
-          className={`absolute w-[30px] h-[28px] top-[60px] ${
+          className={`absolute w-[30px] h-[30px] top-[60px] ${
             isToolbarToggled ? "right-[110px]" : "right-[12px]"
           } z-[1100] bg-gray-800 text-white border-none cursor-pointer shadow-md`}
         >
-          {isToolbarToggled ? ">" : "<"}
+          {isToolbarToggled ? (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-5 h-5"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
+    ) : (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="w-5 h-5"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5L15.75 12l-7.5 7.5" />
+      </svg>)}
         </button>
 
         {/* Toolbar */}
@@ -189,7 +210,7 @@ function L1CMapComponent() {
           <button
             title="Graticule"
             onClick={toggleGraticule}
-            className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="text-sm bg-gray-800 text-white px-0 mt-8 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}</button>
             <button title="Download Map" onClick={() => DownloadMap(map)} className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2">Download Map </button></div>
