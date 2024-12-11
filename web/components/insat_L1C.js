@@ -1,45 +1,34 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Map, View } from "ol";
 import TileLayer from "ol/layer/WebGLTile";
 import GeoTIFF from "ol/source/GeoTIFF";
+import Graticule from "ol/layer/Graticule";
+import Stroke from "ol/style/Stroke";
 import "ol/ol.css";
 import { fromUrl } from "geotiff";
 import WebGLTileLayer from "ol/layer/WebGLTile";
-import { OSM, TileWMS } from "ol/source";
+import { OSM } from "ol/source";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorLayer from "ol/layer/Vector";
-import WMTS from "ol/source";
-import WMTSTileGrid from "ol/tilegrid/WMTS";
 import {
   FullScreen,
   defaults as defaultControls,
   MousePosition,
   OverviewMap,
-  overviewMapControl,
 } from "ol/control.js";
-import GraticuleToggle from "./GraticuleToggle";
-import LatLonPopover from "./LatLonPopover";
 import { createStringXY } from "ol/coordinate";
-import MeasuringTool from "./MeasureTool";
 import DownloadMap from "./DownloadMap";
-import { TileGrid } from "ol/tilegrid";
 
 export let map = new Map(null);
+
 export async function ChangeBand(url, band) {
-  // Function to load and process the GeoTIFF COG file
   const loadinsatGeoTIFF = async (url, band) => {
     try {
-      // Fetch the GeoTIFF file
       const tiff = await fromUrl(url);
-
-      // Read the first image (most COGs have one image)
       const image = await tiff.getImage();
-
-      // Fetch metadata
       const gdalMetadata = image.getGDALMetadata();
       console.log("GDAL Metadata:", gdalMetadata);
-      // Iterate through each band and get GDAL metadata
       const MinMax = image.getGDALMetadata(band - 1);
       console.log(MinMax.min, MinMax.max);
       return { min: MinMax.min, max: MinMax.max };
@@ -54,24 +43,23 @@ export async function ChangeBand(url, band) {
       console.error("Failed to retrieve min/max values.");
       return;
     }
-    // Create a custom WebGLTileLayer to display the grayscale image
     const source = new GeoTIFF({
       sources: [
         {
           url: url,
-          bands: [1, 2, 3, 4, 5, 6], // Use band 1 (or any band you want)
+          bands: [1, 2, 3, 4, 5, 6],
           max: MinMax.max,
           min: MinMax.min,
         },
       ],
-      projection: "ESPG:4326",
+      projection: "EPSG:4326",
     });
     const insatMap = new WebGLTileLayer({
       source: source,
       style: {
         color: [
           "array",
-          ["band", band], // Single-band visualization
+          ["band", band],
           ["band", band],
           ["band", band],
           1,
@@ -88,17 +76,46 @@ export async function ChangeBand(url, band) {
     map.removeLayer();
     map.addLayer(exampleLayer);
   };
+
   await getInsatMap(url, band);
   console.log("ends");
 }
 
 function L1CMapComponent() {
+  const [isToolbarToggled, setIsToolbarToggled] = useState(false);
+  const [isGraticuleActive, setIsGraticuleActive] = useState(false);
+  const [graticuleLayer, setGraticuleLayer] = useState(null);
+
+  const toggleToolbar = () => {
+    setIsToolbarToggled((prevState) => !prevState);
+  };
+
+  const toggleGraticule = () => {
+    if (isGraticuleActive) {
+      if (graticuleLayer) {
+        map.removeLayer(graticuleLayer);
+        setGraticuleLayer(null);
+      }
+    } else {
+      const grat = new Graticule({
+        strokeStyle: new Stroke({
+          color: "rgba(255,120,0,0.9)",
+          width: 2,
+          lineDash: [0.5, 4],
+        }),
+        showLabels: true,
+        wrapX: false,
+      });
+      map.addLayer(grat);
+      setGraticuleLayer(grat);
+    }
+    setIsGraticuleActive(!isGraticuleActive);
+  };
+
   useEffect(() => {
     const mousePositionControl = new MousePosition({
       coordinateFormat: createStringXY(4),
       projection: "EPSG:4326",
-      // comment the following two lines to have the mouse position
-      // be placed within the map.
       className: "custom-mouse-position",
       target: document.getElementById("mouse-position"),
     });
@@ -107,7 +124,7 @@ function L1CMapComponent() {
       className: "ol-overviewmap ol-custom-overviewmap",
       layers: [
         new TileLayer({
-          source: new OSM(), // Use custom OSM tile source
+          source: new OSM(),
         }),
       ],
       collapseLabel: "\u00BB",
@@ -129,42 +146,58 @@ function L1CMapComponent() {
         zoom: 3,
       }),
     });
-    const url = "http://127.0.0.1:8443/cog/stacked.tif"; // Replace with your COG file URL
-    const baseurl = process.env.NEXT_PUBLIC_BASE_URL;
-    console.log("this is the base url" + baseurl);
 
     const osmLayer = new WebGLTileLayer({
       source: new OSM(),
     });
     map.addLayer(osmLayer);
+
     const geojsonSource = new VectorSource({
-      // You can replace this URL with the path to your GeoJSON file
-      url: "http://127.0.0.1:8443/cog/india-composite.geojson",
+      url: "http://192.168.189.113:8443/cog/india-composite.geojson",
       format: new GeoJSON(),
     });
+
     const IndiaBoundary = new VectorLayer({
       source: geojsonSource,
     });
 
-    //map.getLayers().insertAt(1,vectorLayer)
-    // Create a vector layer to display the GeoJSON
-    //ChangeBand(url, 1);
-    map.addLayer(IndiaBoundary)
-    //AddGraticule();
-    // map.addLayer(vectorLayer)
-    // Cleanup function to destroy the map when the component unmounts
+    map.addLayer(IndiaBoundary);
+
     return () => map.setTarget(null);
-  }, []); // Empty dependency array ensures this effect runs once on mount
+  }, []);
 
   return (
     <div>
-      <GraticuleToggle map={map} />
-      <div id="mouse-position"></div>
-      <div id="map" style={{ width: "100%", height: "1000px" }}></div>
-      <LatLonPopover map={map} />
+      <div id="map" className="relative w-full h-screen"></div>
       <div>
-        <DownloadMap map={map} />
+        {/* Toggle Button */}
+        <button
+          onClick={toggleToolbar}
+          className={`absolute w-[30px] h-[28px] top-[60px] ${
+            isToolbarToggled ? "right-[110px]" : "right-[12px]"
+          } z-[1100] bg-gray-800 text-white border-none cursor-pointer shadow-md`}
+        >
+          {isToolbarToggled ? ">" : "<"}
+        </button>
+
+        {/* Toolbar */}
+        <div
+          className={`ToolbarContainer absolute w-[100px] top-[10px] right-0 z-[1000] transition-all duration-300 ease-in-out ${
+            isToolbarToggled ? "block" : "hidden"
+          }`}
+        >
+          <button
+            title="Graticule"
+            onClick={toggleGraticule}
+            className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}</button>
+            <button title="Download Map" onClick={() => DownloadMap(map)} className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2">Download Map </button></div>
       </div>
+      <div
+        id="mouse-position"
+        className="custom-mouse-position absolute bottom-5 right-2 bg-white-800 text-white-300 text-xs py-1 px-2 border border-gray-600 rounded shadow-md pointer-events-none z-10 flex items-center justify-center"
+      ></div>
     </div>
   );
 }

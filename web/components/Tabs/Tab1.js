@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import styles from "./Tab1.module.css"; // Custom CSS for styling
 import { ChangeBand } from "../insat_L1C";
 
 const Tab1 = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedLayers, setSelectedLayers] = useState([]);
-  const [areLayersVisible, setAreLayersVisible] = useState(true);
+  const [areLayersVisible, setAreLayersVisible] = useState(false);
   const [opacity, setOpacity] = useState(1);
   const [layers, setLayers] = useState([]);
+  const [selectedBaseLayer, setSelectedBaseLayer] = useState("");
 
   const sensorOptions = [
-    { name: "sensor1", id: 1 },
-    { name: "sensor2", id: 2 },
-    { name: "sensor3", id: 3 },
-    { name: "sensor4", id: 4 },
-    { name: "sensor5", id: 5 },
-    { name: "sensor6", id: 6 },
+    { name: "Sensor 1", id: 1 },
+    { name: "Sensor 2", id: 2 },
+    { name: "Sensor 3", id: 3 },
+    { name: "Sensor 4", id: 4 },
+    { name: "Sensor 5", id: 5 },
+    { name: "Sensor 6", id: 6 },
   ];
 
   const layerOptions = [
@@ -26,13 +26,15 @@ const Tab1 = () => {
     "Fire Risk Map",
   ];
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  const baseLayerOptions = [
+    "1",
+    "2",
+    "3",
+    "4",
+  ];
 
-  const toggleLayersVisibility = () => {
-    setAreLayersVisible(!areLayersVisible);
-  };
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const toggleLayersVisibility = () => setAreLayersVisible(!areLayersVisible);
 
   const handleCheckboxChange = (layer) => {
     setSelectedLayers((prev) =>
@@ -40,9 +42,7 @@ const Tab1 = () => {
     );
   };
 
-  const handleOpacityChange = (event) => {
-    setOpacity(event.target.value);
-  };
+  const handleOpacityChange = (event) => setOpacity(event.target.value);
 
   const handleAddLayer = () => {
     setLayers([
@@ -58,50 +58,57 @@ const Tab1 = () => {
     ]);
   };
 
-  const handleDeleteLayer = (id) => {
+  const handleDeleteLayer = (id) =>
     setLayers(layers.filter((layer) => layer.id !== id));
-  };
 
   const handleSensorChange = (e, id) => {
-    const updatedSensor = e.target.value; // Get the selected sensor value
+    const updatedSensor = e.target.value;
     const sensorId = parseInt(updatedSensor, 10);
     ChangeBand("http://127.0.0.1:8443/cog/stacked.tif", sensorId);
-    const updatedLayers = [...layers];
-    const layerIndex = updatedLayers.findIndex((layer) => layer.id === id);
-
-    if (layerIndex !== -1) {
-      updatedLayers[layerIndex] = {
-        ...updatedLayers[layerIndex],
-        sensor: updatedSensor,
-      }; // Update the sensor for the layer
-    }
-
-    setLayers(updatedLayers); // Update the state with the new layers
+    const updatedLayers = layers.map((layer) =>
+      layer.id === id ? { ...layer, sensor: updatedSensor } : layer
+    );
+    setLayers(updatedLayers);
   };
 
-  return (
-    <div className={styles.Tab1}>
-      <h3>Layer Management</h3>
+  const handleBaseLayerChange = (e) => setSelectedBaseLayer(e.target.value);
 
-      {/* Overlay Layers Container */}
-      <div className={styles.overlayContainer}>
-        <h4 className={styles.heading4}>Overlay Layers</h4>
-        <button className={styles.toggleButton} onClick={toggleDropdown}>
-          {isDropdownOpen ? "Hide Layers" : "Show Layers"}
-        </button>
-        <button
-          className={styles.toggleButton}
-          onClick={toggleLayersVisibility}
-        >
-          {areLayersVisible ? "Hide Selected Layers" : "Show Selected Layers"}
-        </button>
+  return (
+    <div className="p-4 bg-gray-800 border border-gray-700 rounded-md shadow-md text-gray-300">
+      <h3 className="text-lg font-semibold text-gray-100 mb-4">
+        Layer Management
+      </h3>
+
+      {/* Overlay Layers Section */}
+      <div className="mb-6">
+        <h4 className="text-sm font-medium text-gray-300 mb-2">
+          Overlay Layers
+        </h4>
+        <div className="flex gap-2">
+          <button
+            className="text-sm bg-gray-700 text-gray-300 px-3 py-1 rounded-md hover:bg-gray-600"
+            onClick={toggleDropdown}
+          >
+            {isDropdownOpen ? "Hide Layers" : "Show Layers"}
+          </button>
+          <button
+            className="text-sm bg-gray-700 text-gray-300 px-3 py-1 rounded-md hover:bg-gray-600"
+            onClick={toggleLayersVisibility}
+          >
+            {areLayersVisible ? "Hide All" : "Show Selected"}
+          </button>
+        </div>
 
         {isDropdownOpen && (
-          <div className={styles.dropdown}>
+          <div className="mt-3 bg-gray-700 border border-gray-600 rounded-md shadow-inner max-h-36 overflow-y-auto">
             {layerOptions.map((layer) => (
-              <label key={layer} className={styles.layerOption}>
+              <label
+                key={layer}
+                className="flex items-center px-3 py-2 text-sm hover:bg-gray-600"
+              >
                 <input
                   type="checkbox"
+                  className="mr-2 accent-gray-500"
                   checked={selectedLayers.includes(layer)}
                   onChange={() => handleCheckboxChange(layer)}
                 />
@@ -111,104 +118,151 @@ const Tab1 = () => {
           </div>
         )}
 
-        {/* Opacity control slider for Overlay Layers */}
-        <div className={styles.opacityControl}>
-          <label htmlFor="opacitySlider">Layer Opacity</label>
+        <div className="mt-4">
+          <label className="block text-sm text-gray-300 mb-2">
+            Layer Opacity
+          </label>
           <input
-            id="opacitySlider"
             type="range"
             min="0"
             max="1"
+            step="0.01"
             value={opacity}
             onChange={handleOpacityChange}
-            className={styles.opacitySlider}
+            className="w-full accent-gray-500"
           />
-          <span>{(opacity * 100).toFixed(0)}%</span>
+          <span className="block mt-2 text-xs text-gray-400">
+            {(opacity * 100).toFixed(0)}%
+          </span>
+        </div>
+
+        {/* Base Layer Selection */}
+        <div className="mt-4">
+          <label className="block text-sm text-gray-300 mb-2">
+            Select Base Layer
+          </label>
+          <select
+            value={selectedBaseLayer}
+            onChange={handleBaseLayerChange}
+            className="text-xs block w-full bg-gray-900 border-gray-700 rounded-md text-gray-300 focus:ring focus:ring-gray-600"
+          >
+            <option value="">Choose Base Layer</option>
+            {baseLayerOptions.map((layer, index) => (
+              <option key={index} value={layer}>
+                {layer}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Sensor Layers Container */}
-      <div className={styles.sensorContainer}>
-        <h4 className={styles.heading4}>Sensor Layers</h4>
-        <button className={styles.addLayerButton} onClick={handleAddLayer}>
+      {/* Sensor Layers Section */}
+      <div>
+        <h4 className="text-sm font-medium text-gray-300 mb-3">
+          Sensor Layers
+        </h4>
+        <button
+          className="mb-3 text-sm bg-gray-700 text-gray-300 px-3 py-1 rounded-md hover:bg-gray-600"
+          onClick={handleAddLayer}
+        >
           Add Sensor Layer
         </button>
 
         {layers.map((layer) => (
-          <div key={layer.id} className={styles.layerContainer}>
-            <div className={styles.layer}>
-              <div className={styles.buttonContainer}>
+          <div
+            key={layer.id}
+            className="mb-4 p-3 bg-gray-700 border border-gray-600 rounded-md shadow-inner"
+          >
+            <div className="flex justify-between items-center mb-3">
               <button
-                className={styles.toggleVisibilityButton}
-                onClick={() => {
-                  const updatedLayers = layers.map((l) =>
-                    l.id === layer.id ? { ...l, visible: !l.visible } : l
-                  );
-                  setLayers(updatedLayers);
-                }}
+                className={`text-sm px-4 py-1 rounded-md ${
+                  layer.visible
+                    ? "bg-green-500 hover:bg-green-600 text-gray-100"
+                    : "bg-green-500 hover:bg-green-600 text-gray-100"
+                }`}
+                onClick={() =>
+                  setLayers((prev) =>
+                    prev.map((l) =>
+                      l.id === layer.id ? { ...l, visible: !l.visible } : l
+                    )
+                  )
+                }
               >
-                {layer.visible ? "Hide Layer" : "Show Layer"}
+                {layer.visible ? "Hide" : "Show"}
               </button>
-
               <button
-                className={styles.deleteLayerButton}
+                className="text-sm bg-red-600 text-gray-100 px-2 py-1 rounded-md hover:bg-red-500"
                 onClick={() => handleDeleteLayer(layer.id)}
               >
                 Delete
               </button>
-              </div>
-              <label>
-                Date:
+            </div>
+            <div className="space-y-2 text-sm">
+              <label className="block">
+                <span>Date:</span>
                 <input
                   type="date"
-                  className={styles.dateInput}
                   value={layer.date}
-                  onChange={(e) => {
-                    const newLayers = [...layers];
-                    newLayers[layer.id - 1].date = e.target.value;
-                    setLayers(newLayers);
-                  }}
+                  onChange={(e) =>
+                    setLayers((prev) =>
+                      prev.map((l) =>
+                        l.id === layer.id ? { ...l, date: e.target.value } : l
+                      )
+                    )
+                  }
+                  className="mt-1 block w-full bg-gray-900 border-gray-700 rounded-md text-gray-300 focus:ring focus:ring-gray-600"
                 />
               </label>
-              <label>
-                Time:
+              <label className="block">
+                <span>Time:</span>
                 <input
                   type="datetime-local"
-                  className={styles.timeInput}
                   value={layer.time}
-                  onChange={(e) => {
-                    const newLayers = [...layers];
-                    newLayers[layer.id - 1].time = e.target.value;
-                    setLayers(newLayers);
-                  }}
+                  onChange={(e) =>
+                    setLayers((prev) =>
+                      prev.map((l) =>
+                        l.id === layer.id ? { ...l, time: e.target.value } : l
+                      )
+                    )
+                  }
+                  className="mt-1 block w-full bg-gray-900 border-gray-700 rounded-md text-gray-300 focus:ring focus:ring-gray-600"
                 />
               </label>
-              <label>Sensor:</label>
-              <select
-                className={styles.sensorSelect}
-                value={layer.id}
-                onChange={(e) => handleSensorChange(e, layer.id)}
-              >
-                <option value="">Select Sensor</option>
-                {sensorOptions.map((sensor) => (
-                  <option key={sensor.id} value={sensor.id}>
-                    {sensor.name}
-                  </option>
-                ))}
-              </select>
-              <label>Opacity:</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={layer.opacity}
-                onChange={(e) => {
-                  const newLayers = [...layers];
-                  newLayers[layer.id - 1].opacity = e.target.value;
-                  setLayers(newLayers);
-                }}
-              />
+              <label className="block">
+                <span>Sensor:</span>
+                <select
+                  value={layer.sensor}
+                  onChange={(e) => handleSensorChange(e, layer.id)}
+                  className="mt-1 block w-full bg-gray-900 border-gray-700 rounded-md text-gray-300 focus:ring focus:ring-gray-600"
+                >
+                  <option value="">Select Sensor</option>
+                  {sensorOptions.map((sensor) => (
+                    <option key={sensor.id} value={sensor.id}>
+                      {sensor.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span>Opacity:</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={layer.opacity}
+                  onChange={(e) =>
+                    setLayers((prev) =>
+                      prev.map((l) =>
+                        l.id === layer.id
+                          ? { ...l, opacity: e.target.value }
+                          : l
+                      )
+                    )
+                  }
+                  className="block w-full accent-gray-500"
+                />
+              </label>
             </div>
           </div>
         ))}
