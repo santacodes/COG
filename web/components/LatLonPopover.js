@@ -11,7 +11,7 @@ function LatLonLogger({ map }) {
     const fetchWeatherData = async (lat, lon) => {
         try {
             const response = await fetch(
-                `http://localhost:8443/weather?lat=${lat}&lon=${lon}&tz=Asia/Kolkata`
+                `http://192.168.189.113:8443/weather?lat=${lat}&lon=${lon}&tz=Asia/Kolkata`
             );
             if (!response.ok) {
                 throw new Error("Failed to fetch weather data");

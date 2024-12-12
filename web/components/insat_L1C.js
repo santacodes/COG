@@ -22,7 +22,66 @@ import DownloadMap from "./DownloadMap";
 import PartialDown from "./PartialDown";
 
 export let map = new Map(null);
-export let osmdup = new WebGLTileLayer(null) 
+export async function rgbband(url,band) {
+  console.log("L1C...............",band)
+  
+  const loadinsatGeoTIFF = async (url, band) => {
+    try {
+      const tiff = await fromUrl(url);0
+      const image = await tiff.getImage();
+      const gdalMetadata = image.getGDALMetadata();
+      console.log("GDAL Metadata:", gdalMetadata);
+      const MinMax = image.getGDALMetadata(band - 1);
+      console.log(MinMax.min, MinMax.max);
+      return { min: MinMax.min, max: MinMax.max };
+    } catch (error) {
+      console.error("Error processing COG:", error);
+    }
+  };
+
+  const initializeMap = async (url, band) => {
+    const MinMax = await loadinsatGeoTIFF(url, band);
+    if (!MinMax) {
+      console.error("Failed to retrieve min/max values.");
+      return;
+    }
+    const source = new GeoTIFF({
+      sources: [
+        {
+          url: url,
+          bands: [1, 2, 3, 4, 5, 6],
+          max: 1023,//MinMax.max,
+          min: 0 //MinMax.min,
+        },
+      ],
+      projection: "EPSG:4326",
+    });
+    const insatMap = new WebGLTileLayer({
+      source: source,
+      style: {
+        color: [
+          "array",
+          ["band", band[0].id],
+          ["band", band[1].id],
+          ["band", band[2].id],
+          1,
+        ],
+      },
+    });
+    return insatMap;
+  };
+
+  const getInsatMap = async (url, band) => {
+    console.log(band);
+    const exampleLayer = await initializeMap(url, band);
+    console.log(exampleLayer);
+    map.removeLayer();
+    map.addLayer(exampleLayer);
+  };
+
+  await getInsatMap(url, band);
+  console.log("ends");
+}export let osmdup = new WebGLTileLayer(null) 
 
 export async function ChangeBand(url, band) {
   const loadinsatGeoTIFF = async (url, band) => {
@@ -120,7 +179,7 @@ function L1CMapComponent() {
       className: "ol-overviewmap ol-custom-overviewmap",
       layers: [
         new TileLayer({
-          source: new OSM(),
+          source: new OSM({}),
         }),
       ],
       collapseLabel: "\u00BB",
@@ -165,80 +224,59 @@ function L1CMapComponent() {
     // Cleanup function to destroy the map when the component unmounts
     return () => map.setTarget(null);
   }, []);
-
+//   <div>
+//   <h1>Map with Bounding Box Drawer</h1>
+//   <PartialDown map={map} />
+// </div>
   return (
     <div>
-      <div>
-        <div id="map" style={{ width: "100%", height: "400px" }}></div>
-      </div>
+
       <div id="map" className="relative w-full h-screen"></div>
-  <div>
-    <h1>Map with Bounding Box Drawer</h1>
-    <PartialDown map={map} />
-    <div id="map" style={{ width: '100%', height: '400px' }}></div>
-  </div>
       <div>
+     
         {/* Toggle Button */}
         <button
+           
           onClick={toggleToolbar}
-          className={`absolute w-[30px] h-[30px] top-[60px] ${
-            isToolbarToggled ? "right-[110px]" : "right-[12px]"
-          } z-[1100] bg-gray-800 text-white border-none cursor-pointer shadow-md`}
+          className={`absolute w-[30px] h-[30px] top-[60px] ${isToolbarToggled ? "right-[110px]" : "right-[12px]"
+            } z-[1100] bg-gray-800 text-white border-none cursor-pointer shadow-md`}
         >
           {isToolbarToggled ? (
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
               className="w-5 h-5"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5L15.75 12l-7.5 7.5" />
             </svg>
           ) : (
             <svg
-              xmlns="http://www.w3.org/2000/svg"
+            xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
               className="w-5 h-5"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 4.5L15.75 12l-7.5 7.5"
-              />
-            </svg>
-          )}
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>)}
         </button>
 
         {/* Toolbar */}
         <div
-          className={`ToolbarContainer absolute w-[100px] top-[10px] right-0 z-[1000] transition-all duration-300 ease-in-out ${
-            isToolbarToggled ? "block" : "hidden"
-          }`}
+          className={`ToolbarContainer absolute w-[100px] top-[10px] right-0 z-[1000] transition-all duration-300 ease-in-out ${isToolbarToggled ? "block" : "hidden"
+            }`}
         >
           <button
             title="Graticule"
             onClick={toggleGraticule}
             className="text-sm bg-gray-800 text-white px-0 mt-8 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}
-          </button>
-          <button
-            title="Download Map"
-            onClick={() => DownloadMap(map)}
-            className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2"
-          >
-            Download Map{" "}
-          </button>
-        </div>
+            {isGraticuleActive ? "Disable Graticule" : "Enable Graticule"}</button>
+          <button title="Download Map" onClick={() => DownloadMap(map)} className="text-sm bg-gray-800 text-white px-0 py-0 rounded-md shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mt-2">Download Map </button></div>
       </div>
       <div
         id="mouse-position"

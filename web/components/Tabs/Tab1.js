@@ -8,14 +8,14 @@ const Tab1 = () => {
   const [opacity, setOpacity] = useState(1);
   const [layers, setLayers] = useState([]);
   const [selectedBaseLayer, setSelectedBaseLayer] = useState("");
-
+  
   const sensorOptions = [
-    { name: "Sensor 1", id: 1 },
-    { name: "Sensor 2", id: 2 },
-    { name: "Sensor 3", id: 3 },
-    { name: "Sensor 4", id: 4 },
-    { name: "Sensor 5", id: 5 },
-    { name: "Sensor 6", id: 6 },
+    { name: "IMG_MIR", id: 1 },
+    { name: "IMG_SWIR", id: 2 },
+    { name: "IMG_TIR1", id: 3 },
+    { name: "IMG_TIR2", id: 4 },
+    { name: "IMG_VIS", id: 5 },
+    { name: "IMG_WV", id: 6 },
   ];
 
   const layerOptions = [
@@ -26,12 +26,7 @@ const Tab1 = () => {
     "Fire Risk Map",
   ];
 
-  const baseLayerOptions = [
-    "1",
-    "2",
-    "3",
-    "4",
-  ];
+  const baseLayerOptions = ["1", "2", "3", "4"];
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
   const toggleLayersVisibility = () => setAreLayersVisible(!areLayersVisible);
@@ -64,7 +59,7 @@ const Tab1 = () => {
   const handleSensorChange = (e, id) => {
     const updatedSensor = e.target.value;
     const sensorId = parseInt(updatedSensor, 10);
-    ChangeBand("http://127.0.0.1:8443/cog/stacked.tif", sensorId);
+    ChangeBand("http://192.168.189.113:8443/cog/stacked.tif", sensorId);
     const updatedLayers = layers.map((layer) =>
       layer.id === id ? { ...layer, sensor: updatedSensor } : layer
     );
@@ -72,6 +67,63 @@ const Tab1 = () => {
   };
 
   const handleBaseLayerChange = (e) => setSelectedBaseLayer(e.target.value);
+
+  // Generate time options for 15-minute intervals
+  const generateTimeOptions = () => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+      const hourString = String(hour).padStart(2, "0");
+      options.push(`${hourString}:15`, `${hourString}:45`);
+    }
+    return options;
+  };
+
+  const isFutureDateTime = (date, time) => {
+    const currentDateTime = new Date();
+    const inputDateTime = new Date(`${date}T${time}`);
+    return inputDateTime > currentDateTime;
+  };
+
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const formattedDate = new Date(date).toLocaleDateString("en-IN", options).toUpperCase();
+    return formattedDate.replace(',', '').split(' ').join('');
+  };
+
+  // Function to format time to HHMM (e.g., 1715)
+  const formatTime = (time) => {
+    return time.replace(":", ""); // Removing the colon
+  };
+
+
+  const handleDateTimeChange = (date, time, layerId) => {
+    if (isFutureDateTime(date, time)) {
+      alert("You cannot select a future date and time.");
+      return;
+    }
+
+    const formattedDate = formatDate(date); // Format date as DDMMMYYYY
+    const formattedTime = formatTime(time); // Format time as HHMM
+    const fileName = `3RIMG_${formattedDate}_${formattedTime}_L1C_ASIA_MER_V01R00.tif`;
+    const layer = layers.find((layer) => layer.id === layerId);
+    console.log(layer);
+    const nameToFind = layer.sensor;
+    const nameToFindId = parseInt(nameToFind, 10)
+    const sensorId = sensorOptions.find((sensor) => sensor.name === nameToFind);
+    // console.log(url)
+    console.log(fileName)
+    ChangeBand(fileName, nameToFindId);
+    // console.log(`Requesting URL: ${url}`);
+
+    const updatedLayers = layers.map((layer) =>
+      layer.id === layerId ? { ...layer, date: date, time: time } : layer
+    );
+    setLayers(updatedLayers);
+    const concatenatedDateTime = `${date}T${time}`;
+    console.log(`DateTime Concatenated: ${concatenatedDateTime}`);
+    // Pass the concatenated date-time to a function
+    // Example: someFunction(concatenatedDateTime);
+  };
 
   return (
     <div className="p-4 bg-gray-800 border border-gray-700 rounded-md shadow-md text-gray-300">
@@ -178,7 +230,7 @@ const Tab1 = () => {
                 className={`text-sm px-4 py-1 rounded-md ${
                   layer.visible
                     ? "bg-green-500 hover:bg-green-600 text-gray-100"
-                    : "bg-green-500 hover:bg-green-600 text-gray-100"
+                    : "bg-red-500 hover:bg-red-600 text-gray-100"
                 }`}
                 onClick={() =>
                   setLayers((prev) =>
@@ -215,18 +267,20 @@ const Tab1 = () => {
               </label>
               <label className="block">
                 <span>Time:</span>
-                <input
-                  type="datetime-local"
+                <select
                   value={layer.time}
                   onChange={(e) =>
-                    setLayers((prev) =>
-                      prev.map((l) =>
-                        l.id === layer.id ? { ...l, time: e.target.value } : l
-                      )
-                    )
+                    handleDateTimeChange(layer.date, e.target.value, layer.id)
                   }
                   className="mt-1 block w-full bg-gray-900 border-gray-700 rounded-md text-gray-300 focus:ring focus:ring-gray-600"
-                />
+                >
+                  <option value="">Select Time</option>
+                  {generateTimeOptions().map((timeOption) => (
+                    <option key={timeOption} value={timeOption}>
+                      {timeOption}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="block">
                 <span>Sensor:</span>
@@ -255,13 +309,16 @@ const Tab1 = () => {
                     setLayers((prev) =>
                       prev.map((l) =>
                         l.id === layer.id
-                          ? { ...l, opacity: e.target.value }
+                          ? { ...l, opacity: parseFloat(e.target.value) }
                           : l
                       )
                     )
                   }
-                  className="block w-full accent-gray-500"
+                  className="w-full accent-gray-500"
                 />
+                <span className="block mt-1 text-xs text-gray-400">
+                  {(layer.opacity * 100).toFixed(0)}%
+                </span>
               </label>
             </div>
           </div>
@@ -272,3 +329,8 @@ const Tab1 = () => {
 };
 
 export default Tab1;
+
+
+
+
+

@@ -46,7 +46,7 @@ function WeatherChart({ lat, lon }) {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8443/weather?lat=22.065278067765835&lon=80.46386718750001`
+          `http://192.168.189.113:8443/weather?lat=22.065278067765835&lon=80.46386718750001`
         );
         const apiData = await response.json();
         console.log("this is the data", apiData);
@@ -98,23 +98,23 @@ function WeatherChart({ lat, lon }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-7xl mx-auto justify-items-center">
       <canvas
         id="humidityChart"
-        className="w-full h-auto max-w-full max-h-[400px]"
+        className="w-full h-auto max-w-[600px] max-h-[600px]"
       ></canvas>
       <canvas
         id="pressureChart"
-        className="w-full h-auto max-w-full max-h-[400px]"
+        className="w-full h-auto max-w-[600px] max-h-[600px]"
       ></canvas>
       <canvas
         id="tempChart"
-        className="w-full h-auto max-w-full max-h-[400px]"
+        className="w-full h-auto max-w-[600px] max-h-[600px]"
       ></canvas>
       <canvas
         id="windChart"
-        className="w-full h-auto max-w-full max-h-[400px]"
+        className="w-full h-auto max-w-[600px] max-h-[600px]"
       ></canvas>
       <canvas
         id="precipChart"
-        className="w-full h-auto max-w-full max-h-[400px]"
+        className="w-full h-auto max-w-[600px] max-h-[600px]"
       ></canvas>
     </div>
 
