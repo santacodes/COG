@@ -1,3 +1,0 @@
-h5py
-numpy>=2.1
-rasterio
